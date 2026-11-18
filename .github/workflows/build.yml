@@ -75,10 +75,18 @@ jobs:
           if-no-files-found: error
 
   test:
-    needs: build
+    needs: [version, build]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      # the wad test reads libquake's test data from a checkout next to this one
+      - uses: actions/checkout@v4
+        with:
+          repository: libquake/libquake
+          ref: ${{ needs.version.outputs.tag }}
+          path: libquake-src
+          sparse-checkout: tests/data
+      - run: ln -s "$PWD/libquake-src" ../libquake
       - uses: actions/download-artifact@v4
         with:
           name: libquake.so
