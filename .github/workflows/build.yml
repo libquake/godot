@@ -64,7 +64,7 @@ jobs:
       - name: configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DLIBQUAKE_DIR="${{ github.workspace }}/libquake-src"
       - name: build
-        run: cmake --build build --config Release --parallel
+        run: cmake --build build --config Release --parallel 4
       - name: sign
         if: runner.os == 'macOS'
         run: codesign --force -s - addons/libquake/bin/libquake.dylib

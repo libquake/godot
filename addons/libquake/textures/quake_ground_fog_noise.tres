@@ -1,4 +1,4 @@
-[gd_resource type="NoiseTexture2D" load_steps=2 format=3]
+[gd_resource type="NoiseTexture2D" format=3 uid="uid://dopmla0redc6m"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_fog"]
 frequency = 0.02
@@ -7,5 +7,5 @@ fractal_octaves = 2
 [resource]
 width = 256
 height = 256
-seamless = true
 noise = SubResource("FastNoiseLite_fog")
+seamless = true
