@@ -5,8 +5,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(APPLE)
-  set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "")
+  # universal, one binary for both kinds of Mac. project() made the cache entries already, empty
+  set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "" FORCE)
 endif()
 
 set(LIBQUAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libquake" CACHE PATH "libquake checkout")
