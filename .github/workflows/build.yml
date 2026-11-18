@@ -1,0 +1,117 @@
+# Builds the extension for Windows, macOS and Linux against a libquake release, runs the tests and commits the
+# binaries to addons/libquake/bin. Runs on a libquake release (repository_dispatch libquake-release), on a push
+# that changes the extension, and by hand.
+name: build
+
+on:
+  repository_dispatch:
+    types: [libquake-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "libquake release tag, empty for the one in LIBQUAKE_VERSION"
+        required: false
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "CMakeLists.txt"
+      - "LIBQUAKE_VERSION"
+      - "addons/libquake/libquake.gdextension"
+      - ".github/workflows/build.yml"
+  pull_request:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.7.2
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: tag
+        run: |
+          tag="${{ github.event.client_payload.version || github.event.inputs.version }}"
+          [ -n "$tag" ] || tag=$(tr -d '[:space:]' < LIBQUAKE_VERSION)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04 # the oldest glibc still built on keeps the library loadable on older distributions
+            library: libquake.so
+          - os: macos-14
+            library: libquake.dylib
+          - os: windows-2022
+            library: libquake.dll
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: libquake/libquake
+          ref: ${{ needs.version.outputs.tag }}
+          path: libquake-src
+      - name: configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DLIBQUAKE_DIR="${{ github.workspace }}/libquake-src"
+      - name: build
+        run: cmake --build build --config Release --parallel
+      - name: sign
+        if: runner.os == 'macOS'
+        run: codesign --force -s - addons/libquake/bin/libquake.dylib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.library }}
+          path: addons/libquake/bin/${{ matrix.library }}
+          if-no-files-found: error
+
+  test:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: libquake.so
+          path: addons/libquake/bin
+      - name: godot
+        run: |
+          curl -sSLo godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          echo "GODOT=$PWD/Godot_v${GODOT_VERSION}-stable_linux.x86_64" >> "$GITHUB_ENV"
+      - name: tests
+        run: tests/run.sh
+
+  commit:
+    needs: [version, test]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: addons/libquake/bin
+          merge-multiple: true
+      - name: commit
+        run: |
+          echo "${{ needs.version.outputs.tag }}" > LIBQUAKE_VERSION
+          git add LIBQUAKE_VERSION addons/libquake/bin
+          if git diff --staged --quiet; then
+            echo "binaries unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "binaries built with libquake ${{ needs.version.outputs.tag }}"
+          git push

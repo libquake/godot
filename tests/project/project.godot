@@ -1,0 +1,20 @@
+; Test project of the libquake plugin, run it with ../run.sh
+
+config_version=5
+
+[application]
+
+config/name="libquake tests"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/libquake/plugin.cfg")
+
+[libquake]
+
+entities/entity_classes="res://entity_classes.tres"
+entities/ground_fog_styles=PackedStringArray("res://fog_styles")
+
+[physics]
+
+3d/physics_engine="Jolt Physics"

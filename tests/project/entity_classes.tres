@@ -1,0 +1,74 @@
+[gd_resource type="Resource" script_class="QuakeEntityClasses" format=3]
+
+[ext_resource type="Script" path="res://addons/libquake/quake_entity_classes.gd" id="1_classes"]
+[ext_resource type="Script" path="res://addons/libquake/quake_entity_class.gd" id="2_class"]
+[ext_resource type="Script" path="res://addons/libquake/examples/quake_trigger.gd" id="9_trigger"]
+[ext_resource type="Script" path="res://addons/libquake/examples/quake_teleport.gd" id="3_teleport"]
+[ext_resource type="Script" path="res://addons/libquake/examples/quake_teleport_destination.gd" id="4_destination"]
+
+[sub_resource type="Resource" id="Resource_teleport"]
+script = ExtResource("2_class")
+classname = "trigger_teleport"
+type = 1
+description = "Teleports a body that enters to the info_teleport_destination it targets"
+node_script = ExtResource("3_teleport")
+properties = Dictionary[String, Variant]({
+"target": ""
+})
+property_descriptions = Dictionary[String, String]({
+"target": "targetname of the destination"
+})
+color = Color(0.8, 0.4, 1, 1)
+
+[sub_resource type="Resource" id="Resource_destination"]
+script = ExtResource("2_class")
+classname = "info_teleport_destination"
+description = "Where a teleporter sends its bodies, facing angle"
+node_script = ExtResource("4_destination")
+properties = Dictionary[String, Variant]({
+"targetname": "",
+"angle": 0
+})
+property_descriptions = Dictionary[String, String]({
+"targetname": "Name the teleporters target",
+"angle": "Yaw the body faces after teleporting"
+})
+color = Color(0.8, 0.4, 1, 1)
+size = AABB(-16, -16, -24, 32, 32, 56)
+
+[sub_resource type="Resource" id="Resource_trigger_multiple"]
+script = ExtResource("2_class")
+classname = "trigger_multiple"
+type = 1
+description = "Fires its targets when a character enters, again after wait seconds"
+node_script = ExtResource("9_trigger")
+properties = Dictionary[String, Variant]({
+"target": "",
+"delay": 0.0,
+"wait": 0.2
+})
+property_descriptions = Dictionary[String, String]({
+"target": "targetname of the entities it fires",
+"delay": "Seconds before firing"
+})
+color = Color(0.8, 0.5, 0.2, 1)
+
+[sub_resource type="Resource" id="Resource_trigger_once"]
+script = ExtResource("2_class")
+classname = "trigger_once"
+type = 1
+description = "Fires its targets the first time a character enters"
+node_script = ExtResource("9_trigger")
+properties = Dictionary[String, Variant]({
+"target": "",
+"delay": 0.0
+})
+property_descriptions = Dictionary[String, String]({
+"target": "targetname of the entities it fires",
+"delay": "Seconds before firing"
+})
+color = Color(0.8, 0.5, 0.2, 1)
+
+[resource]
+script = ExtResource("1_classes")
+classes = Array[ExtResource("2_class")]([SubResource("Resource_teleport"), SubResource("Resource_destination"), SubResource("Resource_trigger_multiple"), SubResource("Resource_trigger_once")])

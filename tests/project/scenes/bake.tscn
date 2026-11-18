@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://maps/level.map" id="1_map"]
+[ext_resource type="Script" path="res://addons/libquake/quake_lightmap.gd" id="2_lightmap"]
+
+[sub_resource type="StandardMaterial3D" id="Material_tiled"]
+uv1_scale = Vector3(4, 4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_box"]
+material = SubResource("Material_tiled")
+add_uv2 = true
+
+[node name="Bake" type="Node3D"]
+
+[node name="QuakeLightmap" type="Node3D" parent="."]
+script = ExtResource("2_lightmap")
+
+[node name="Map" parent="." instance=ExtResource("1_map")]
+
+[node name="Box" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 4)
+mesh = SubResource("BoxMesh_box")
+
+[node name="Light" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 4)
+light_bake_mode = 1
+shadow_enabled = true
+omni_range = 8.0
+
+[node name="Rigid" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.5, 4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Rigid"]
+mesh = SubResource("BoxMesh_box")

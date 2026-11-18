@@ -1,0 +1,123 @@
+#pragma once
+
+#include "texture_lookup.h"
+
+#include <godot_cpp/classes/array_mesh.hpp>
+#include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/classes/ref_counted.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
+#include <map>
+#include <quakelib/level.h>
+
+namespace libquake_godot {
+
+  /// A .map or .bsp loaded through libquake, converted to Godot coordinates and units.
+  class QuakeLevel : public godot::RefCounted {
+    GDCLASS(QuakeLevel, godot::RefCounted)
+
+  public:
+    enum HullType {
+      HULL_SOLID,
+      HULL_CLIP,
+      HULL_LIQUID,
+    };
+
+    /// origin of the brush entities' meshes and hulls, libquake's PivotMode
+    enum Pivot {
+      PIVOT_MAP_ORIGIN,
+      PIVOT_CENTER,
+      PIVOT_BOTTOM_CENTER,
+      PIVOT_BOTTOM_CORNER,
+    };
+
+    godot::Error load(const godot::String &path);
+
+    int get_geometry_count() const;
+    godot::Ref<godot::ArrayMesh> get_geometry_mesh(int index) const;
+    godot::TypedArray<godot::Dictionary> get_geometry_hulls(int index) const;
+    godot::Vector3 get_geometry_pivot(int index) const;
+
+    godot::TypedArray<godot::Dictionary> get_entities() const;
+
+    godot::PackedStringArray get_texture_names() const;
+    godot::Ref<godot::Image> get_texture_image(const godot::String &name) const;
+    godot::Ref<godot::Image> get_texture_emission(const godot::String &name) const;
+    godot::Ref<godot::Image> get_sky_front_image(const godot::String &name) const;
+    godot::Ref<godot::Image> get_lightmap_image() const;
+    godot::Dictionary build_light_grid(float cell_size) const;
+    godot::Dictionary get_lightmap_layers() const;
+
+    godot::Vector3 to_godot_position(const godot::Vector3 &quake_point) const;
+
+    static godot::PackedByteArray get_default_palette();
+
+    void set_units_per_meter(float value) { units_per_meter = value; }
+
+    float get_units_per_meter() const { return units_per_meter; }
+
+    void set_bake(bool value) { bake = value; }
+
+    bool get_bake() const { return bake; }
+
+    void set_luxel_size(float value) { luxel_size = value; }
+
+    float get_luxel_size() const { return luxel_size; }
+
+    void set_csg(bool value) { csg = value; }
+
+    bool get_csg() const { return csg; }
+
+    void set_pivot(Pivot value) { pivot = value; }
+
+    Pivot get_pivot() const { return pivot; }
+
+    void set_merge_groups(bool value) { merge_groups = value; }
+
+    bool get_merge_groups() const { return merge_groups; }
+
+    void set_texture_size_provider(const godot::Callable &value) { texture_size_provider = value; }
+
+    godot::Callable get_texture_size_provider() const { return texture_size_provider; }
+
+    void set_missing_texture_size(const godot::Vector2i &value) { missing_texture_size = value; }
+
+    godot::Vector2i get_missing_texture_size() const { return missing_texture_size; }
+
+    void set_sky_surfaces(bool value) { sky_surfaces = value; }
+
+    bool get_sky_surfaces() const { return sky_surfaces; }
+
+    void set_wad_directories(const godot::PackedStringArray &value) { wad_directories = value; }
+
+    godot::PackedStringArray get_wad_directories() const { return wad_directories; }
+
+  protected:
+    static void _bind_methods();
+
+  private:
+    std::vector<uint8_t> composedLightmap() const;
+    std::pair<int, int> textureSize(const std::string &name, TextureLookup &lookup) const;
+    const TextureImage *findTexture(const godot::String &name) const;
+    godot::Vector3 toGodot(const quakelib::Vec3 &point) const;
+
+    quakelib::Level level;
+    std::map<std::string, TextureImage> textures;
+
+    float units_per_meter = 32.0f;
+    bool bake = true;
+    float luxel_size = 16.0f;
+    bool sky_surfaces = true;
+    bool csg = true;
+    Pivot pivot = PIVOT_MAP_ORIGIN;
+    bool merge_groups = false;
+    /// name -> Vector2i pixel size of an image texture, Vector2i() if there is none; comes before the wads
+    godot::Callable texture_size_provider;
+    /// uv size of textures nobody has, the size of the placeholder that shows how they are mapped
+    godot::Vector2i missing_texture_size{64, 64};
+    godot::PackedStringArray wad_directories;
+  };
+
+} // namespace libquake_godot
+
+VARIANT_ENUM_CAST(libquake_godot::QuakeLevel::HullType);
+VARIANT_ENUM_CAST(libquake_godot::QuakeLevel::Pivot);

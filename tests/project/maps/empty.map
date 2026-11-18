@@ -1,0 +1,7 @@
+// Game: libquake tests
+// Format: Valve
+// entity 0
+{
+"classname" "worldspawn"
+"mapversion" "220"
+}

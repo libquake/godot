@@ -1,0 +1,88 @@
+extends QuakeTest
+
+const SAVED := "res://scenes/bake.lightmap.res"
+
+var _frames := 0
+
+
+func test_bake() -> void:
+	var scene := add_scene("res://scenes/bake.tscn")
+	await frames(1)
+	var lightmap: QuakeLightmap = scene.get_node("QuakeLightmap")
+	# as in a copy of another scene
+	var foreign := QuakeLightmapData.new()
+	foreign.take_over_path("res://scenes/other.lightmap.res")
+	lightmap.data = foreign
+	get_tree().process_frame.connect(_count_frame)
+	var path: String = await lightmap.bake()
+	get_tree().process_frame.disconnect(_count_frame)
+
+	check_equal(path, SAVED, "saved next to the scene, not into the file of the assigned data")
+	check(_frames > 0, "the editor keeps running while baking")
+	var meshes := Array(lightmap.data.meshes).map(func(node_path: NodePath) -> String: return str(node_path))
+	check(meshes.has("../Box"), "the box is baked")
+	check(not meshes.has("../Rigid/Mesh"), "meshes of moving bodies are not")
+	check(Array(lightmap.data.layers.get("styles", [])).has(1), "light styles are baked too")
+
+	var material := scene.get_node("Box").get_active_material(0) as ShaderMaterial
+	check(material != null and material.shader == QuakeMaterials.WORLD_SHADER, "the box gets the world shader")
+	if material:
+		check_equal(material.get_shader_parameter(&"uv_scale"), Vector2(4, 4), "tiling of the StandardMaterial3D")
+	check_equal(scene.get_node("Light").light_cull_mask, 0xFFFFFFFF, "the baked light keeps its cull mask")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVED))
+
+
+## A level put together while the game runs, like a generator does: no scene file, two modules side by side.
+func test_bake_in_the_game() -> void:
+	var level := Node3D.new()
+	add_child(level)
+	var lightmap := QuakeLightmap.new()
+	level.add_child(lightmap)
+	var module: PackedScene = load("res://maps/level.map")
+	for index in 2:
+		var map := module.instantiate()
+		map.name = "Module%d" % index
+		map.position = Vector3(40.0 * index, 0.0, 0.0)
+		level.add_child(map)
+	await frames(1)
+
+	check(await lightmap.bake_to(), "baked without a scene file")
+	check(lightmap.data != null and lightmap.data.resource_path.is_empty(), "kept in memory only")
+	var meshes := Array(lightmap.data.meshes).map(func(node_path: NodePath) -> String: return str(node_path))
+	check(meshes.any(func(path: String) -> bool: return path.begins_with("../Module0/")), "the first module")
+	check(meshes.any(func(path: String) -> bool: return path.begins_with("../Module1/")), "the second, in the same bake")
+	check(lightmap.data.grid_size.x * lightmap.data.grid_cell_size > 40.0, "one light grid over both")
+
+	var cache := "user://libquake_test.lightmap.res"
+	check(await lightmap.bake_to(cache), "baked into a cache")
+	check(load(cache) is QuakeLightmapData, "saved where asked")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(cache))
+	level.queue_free()
+
+
+func _count_frame() -> void:
+	_frames += 1
+
+
+func test_only_the_world_casts_shadows() -> void:
+	var scope := Node3D.new()
+	add_child(scope)
+	var lightmap := QuakeLightmap.new()
+	scope.add_child(lightmap)
+	var cases := {"worldspawn": true, "func_group": true, "func_detail_wall": true, "func_door": false}
+	for classname: String in cases:
+		check_equal(lightmap._entity_casts_shadow(_entity_mesh(scope, classname, {})), cases[classname], classname)
+	check(lightmap._entity_casts_shadow(_entity_mesh(scope, "func_door", {"_shadow": "1"})), "func_door with _shadow 1")
+	var plain := MeshInstance3D.new()
+	scope.add_child(plain)
+	check(lightmap._entity_casts_shadow(plain), "a mesh outside of maps")
+	scope.queue_free()
+
+
+static func _entity_mesh(scope: Node, classname: String, properties: Dictionary) -> MeshInstance3D:
+	var entity := StaticBody3D.new()
+	entity.set_meta(QuakeSceneBuilder.ENTITY_META, {"classname": classname, "properties": properties})
+	scope.add_child(entity)
+	var mesh := MeshInstance3D.new()
+	entity.add_child(mesh)
+	return mesh
