@@ -49,7 +49,7 @@ jobs:
         include:
           - os: ubuntu-22.04 # the oldest glibc still built on keeps the library loadable on older distributions
             library: libquake.so
-          - os: macos-14
+          - os: macos-latest
             library: libquake.dylib
           - os: windows-2022
             library: libquake.dll
