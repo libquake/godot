@@ -29,7 +29,7 @@ Then run **Project > Tools > Set up libquake Project**, see [Getting started](gu
 | `.map` with `_meshlib 1` | pieces to drag into levels, a scene per TrenchBroom group |
 | `.bsp` | the same scene, with the bsp's textures, lightmap and face collision |
 | `textures/*.png` | read by the maps that use them, nothing has to be imported by hand |
-| `.wad` | read by the maps that name it; **Extract WAD Textures** turns it into images |
+| `.wad` | read by the maps that name it; its textures show in the Quake panel, **Extract WAD Textures** turns them into images |
 
 Besides importing, the plugin lights models like Quake does, animates light styles, bakes light for levels put
 together in Godot, in the editor or while the game runs, and brings an underwater view and ground fog.

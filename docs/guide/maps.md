@@ -63,8 +63,9 @@ pivot as the piece's origin. Brush entities outside groups get their own piece, 
 
 Each piece is saved as a file of its own, by default in a folder named like the map next to it
 (`maps/pieces.map` puts them in `maps/pieces/`). In the FileSystem dock's thumbnail view the folder is a palette:
-drag a piece into the 3D viewport and Godot puts it on the surface under the mouse. `pieces/save_as` chooses what
-a piece is:
+drag a piece into the 3D viewport and Godot puts it on the surface under the mouse. Selecting the map shows its
+pieces in the **Quake** panel at the bottom of the editor, with a filter and a size slider; they drag from there
+the same way. `pieces/save_as` chooses what a piece is:
 
 | `pieces/save_as` | A piece | Dropped into a scene |
 |---|---|---|

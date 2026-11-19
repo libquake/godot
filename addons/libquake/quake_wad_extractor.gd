@@ -7,6 +7,18 @@ extends RefCounted
 
 
 ## The number of textures written, -1 if the wad does not load.
+## Into the project's first texture directory, with a message how it went.
+static func extract_to_project(wad_path: String) -> void:
+	var directories: PackedStringArray = QuakeImportSettings.project_default("textures/texture_directories")
+	var directory := directories[0] if not directories.is_empty() else "res://textures"
+	var count := extract(wad_path, directory)
+	if count < 0:
+		push_error("libquake: could not read %s" % wad_path)
+		return
+	print("libquake: %d textures of %s written to %s" % [count, wad_path.get_file(), directory])
+	EditorInterface.get_resource_filesystem().scan()
+
+
 static func extract(wad_path: String, directory: String) -> int:
 	var wad := QuakeWad.new()
 	if wad.load(ProjectSettings.globalize_path(wad_path)) != OK:

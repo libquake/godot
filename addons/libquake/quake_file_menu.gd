@@ -1,6 +1,7 @@
 @tool
 extends EditorContextMenuPlugin
-## FileSystem dock: "Open in TrenchBroom" on maps, and a new map in a folder, opened in TrenchBroom right away.
+## FileSystem dock: "Open in TrenchBroom" on maps, "Extract WAD Textures" on wads, and a new map in a folder,
+## opened in TrenchBroom right away.
 
 const EXECUTABLE_SETTING := "libquake/trenchbroom/executable"
 
@@ -18,6 +19,8 @@ func _popup_menu(paths: PackedStringArray) -> void:
 		add_context_menu_item("Quake Map...", _create_map)
 	elif not paths.is_empty() and Array(paths).all(func(path: String) -> bool: return path.get_extension().to_lower() == "map"):
 		add_context_menu_item("Open in TrenchBroom", _open)
+	elif not paths.is_empty() and Array(paths).all(func(path: String) -> bool: return path.get_extension().to_lower() == "wad"):
+		add_context_menu_item("Extract WAD Textures", _extract)
 
 
 func _create_map(paths: PackedStringArray) -> void:
@@ -34,6 +37,11 @@ func _create_map(paths: PackedStringArray) -> void:
 	EditorInterface.get_resource_filesystem().update_file(path)
 	EditorInterface.select_file(path)
 	_open(PackedStringArray([path]))
+
+
+static func _extract(paths: PackedStringArray) -> void:
+	for path in paths:
+		QuakeWadExtractor.extract_to_project(path)
 
 
 static func _open(paths: PackedStringArray) -> void:

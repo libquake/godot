@@ -19,8 +19,12 @@ For every texture a map uses, the import takes the first of:
 
 Textures from a wad keep Quake's palette: fullbright pixels glow, skies are split into their two layers.
 
-**Project > Tools > Extract WAD Textures...** turns a wad into image files, `textures/<wad>/<name>.png` with `#`
-for `*`, `_luma` and `_front` next to them. TrenchBroom then shows them without the wad, and they can be
+A `.wad` in the project imports as a `QuakeWadTextures`, the names, sizes and previews of its textures: the
+FileSystem dock lists it, and selecting it shows its textures in the **Quake** panel at the bottom of the editor.
+Maps do not use the import, they read the wad itself.
+
+**Extract WAD Textures** in the wad's context menu, the Quake panel or *Project > Tools* turns a wad into image
+files, `textures/<wad>/<name>.png` with `#` for `*`, `_luma` and `_front` next to them. TrenchBroom then shows them without the wad, and they can be
 edited like any image. `QuakeWadExtractor.extract(wad_path, directory)` does the same from a script.
 
 ## How surfaces are drawn

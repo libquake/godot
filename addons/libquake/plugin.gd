@@ -16,6 +16,9 @@ var _fog_gizmo: QuakeGroundFogGizmo
 var _bake_button: Button
 var _lightmap: QuakeLightmap
 var _auto_bake_timer: Timer
+var _browser: Control
+## The browser's EditorDock, or the browser itself in the bottom panel of Godot 4.5.
+var _browser_dock: Control
 
 
 func _enter_tree() -> void:
@@ -27,7 +30,8 @@ func _enter_tree() -> void:
 		var file_menu: EditorContextMenuPlugin = preload("quake_file_menu.gd").new()
 		add_context_menu_plugin(slot, file_menu)
 		_file_menus.append(file_menu)
-	for importer in [preload("quake_level_importer.gd"), preload("quake_pieces_importer.gd")]:
+	for importer in [preload("quake_level_importer.gd"), preload("quake_pieces_importer.gd"),
+			preload("quake_wad_importer.gd")]:
 		var instance: EditorImportPlugin = importer.new()
 		add_import_plugin(instance)
 		_importers.append(instance)
@@ -54,6 +58,8 @@ func _enter_tree() -> void:
 	_bake_button.pressed.connect(_bake)
 	add_control_to_container(CONTAINER_SPATIAL_EDITOR_MENU, _bake_button)
 
+	_add_browser()
+
 	_auto_bake_timer = Timer.new()
 	_auto_bake_timer.one_shot = true
 	_auto_bake_timer.timeout.connect(_auto_bake)
@@ -77,6 +83,7 @@ func _exit_tree() -> void:
 	get_undo_redo().version_changed.disconnect(_on_scene_changed)
 	remove_control_from_container(CONTAINER_SPATIAL_EDITOR_MENU, _bake_button)
 	_bake_button.queue_free()
+	_remove_browser()
 	remove_tool_menu_item(SETUP_MENU_ITEM)
 	remove_tool_menu_item(EXPORT_MENU_ITEM)
 	remove_tool_menu_item(EXTRACT_MENU_ITEM)
@@ -130,6 +137,8 @@ func _on_scene_changed() -> void:
 
 ## A map placed in the open scene changed: its light has to be baked again.
 func _on_resources_reimported(resources: PackedStringArray) -> void:
+	if resources.has(_browser.path):
+		_show_in_browser(_browser.path)
 	var root := EditorInterface.get_edited_scene_root()
 	if not root:
 		return
@@ -176,14 +185,63 @@ func _choose_wad() -> void:
 
 
 func _extract_wad(path: String) -> void:
-	var directories: PackedStringArray = QuakeImportSettings.project_default("textures/texture_directories")
-	var directory := directories[0] if not directories.is_empty() else "res://textures"
-	var count := QuakeWadExtractor.extract(path, directory)
-	if count < 0:
-		push_error("libquake: could not read %s" % path)
-		return
-	print("libquake: %d textures of %s written to %s" % [count, path.get_file(), directory])
-	EditorInterface.get_resource_filesystem().scan()
+	QuakeWadExtractor.extract_to_project(path)
+
+
+## The Quake panel at the bottom: an EditorDock from Godot 4.6 on, before it the bottom panel. Selecting a map of
+## pieces or a wad in the FileSystem dock shows it there.
+func _add_browser() -> void:
+	_browser = preload("quake_browser.gd").new()
+	_browser.extract_requested.connect(_extract_wad)
+	if ClassDB.class_exists(&"EditorDock"):
+		_browser_dock = ClassDB.instantiate(&"EditorDock")
+		_browser_dock.set(&"title", "Quake")
+		_browser_dock.set(&"layout_key", "libquake_browser")
+		_browser_dock.set(&"default_slot", ClassDB.class_get_integer_constant(&"EditorDock", &"DOCK_SLOT_BOTTOM"))
+		_browser_dock.add_child(_browser)
+		call(&"add_dock", _browser_dock)
+	else:
+		_browser_dock = _browser
+		add_control_to_bottom_panel(_browser, "Quake")
+	var file_system := EditorInterface.get_file_system_dock()
+	if file_system.has_signal(&"selection_changed"):
+		file_system.connect(&"selection_changed", _on_files_selected)
+
+
+func _remove_browser() -> void:
+	var file_system := EditorInterface.get_file_system_dock()
+	if file_system.is_connected(&"selection_changed", _on_files_selected):
+		file_system.disconnect(&"selection_changed", _on_files_selected)
+	if _browser_dock != _browser:
+		call(&"remove_dock", _browser_dock)
+	else:
+		remove_control_from_bottom_panel(_browser)
+	_browser_dock.queue_free()
+
+
+func _on_files_selected() -> void:
+	var paths := EditorInterface.get_selected_paths()
+	if paths.size() == 1 and _show_in_browser(paths[0]):
+		if _browser_dock != _browser:
+			_browser_dock.call(&"make_visible")
+		else:
+			make_bottom_panel_item_visible(_browser)
+
+
+## Levels import as scenes, only pieces and wads are a Resource: no level is loaded for a click.
+func _show_in_browser(path: String) -> bool:
+	if not path.get_extension().to_lower() in ["map", "wad"]:
+		return false
+	if EditorInterface.get_resource_filesystem().get_file_type(path) != "Resource":
+		return false
+	var resource := load(path)
+	if resource is QuakePieces:
+		_browser.show_pieces(resource, path)
+	elif resource is QuakeWadTextures:
+		_browser.show_wad(resource, path)
+	else:
+		return false
+	return true
 
 
 func _set_up_project() -> void:

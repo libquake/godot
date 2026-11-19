@@ -36,6 +36,8 @@
 | `QuakeLevel` (`RefCounted`) | libquake's level: `load(path)`, then geometry, entities, textures and lightmap. What the importers use |
 | `QuakeWad` (`RefCounted`) | a wad: `load(path)`, `get_texture_names()`, `get_texture_image(name)`, `get_texture_emission(name)`, `get_sky_front_image(name)` |
 | `QuakeWadExtractor` | `extract(wad_path, directory)`, the image files of **Extract WAD Textures** |
+| `QuakePieces` (`Resource`) | what a map of pieces imports as: `names`, `files`, `previews` of its pieces, `find(name)` |
+| `QuakeWadTextures` (`Resource`) | what a `.wad` imports as: `names`, `sizes`, `previews` of its textures |
 
 ## Shaders
 

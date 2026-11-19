@@ -22,6 +22,25 @@ func test_wad_becomes_image_files() -> void:
 	_remove(ProjectSettings.globalize_path(TARGET))
 
 
+func test_wad_imports_as_its_textures() -> void:
+	var wad_path := ProjectSettings.globalize_path("res://").path_join(WAD).simplify_path()
+	var importer: GDScript = load("res://addons/libquake/quake_wad_importer.gd")
+	var textures: QuakeWadTextures = importer.read(wad_path)
+	check(textures != null, "read")
+	if not textures:
+		return
+	var wad := QuakeWad.new()
+	wad.load(wad_path)
+	check_equal(textures.names, wad.get_texture_names(), "every texture, by its name")
+	check_equal(textures.previews.size(), textures.size(), "a preview each")
+	var first := wad.get_texture_image(textures.names[0])
+	check_equal(Vector2i(textures.sizes[0]), first.get_size(), "the full size")
+	var preview := textures.previews[0].get_image()
+	check(preview.get_width() <= 128 and preview.get_height() <= 128, "previews 128 pixels at most")
+	if first.get_size() == preview.get_size():
+		check_equal(preview.get_pixel(3, 5), first.get_pixel(3, 5), "lossless")
+
+
 static func _remove(directory: String) -> void:
 	for subdirectory in DirAccess.get_directories_at(directory):
 		_remove(directory.path_join(subdirectory))
