@@ -165,3 +165,15 @@ func test_edits_on_the_baked_material_are_kept() -> void:
 	baked.set_shader_parameter(&"albedo_color", Color.GREEN)
 	check(QuakeLightmap._source(baked) == source, "the source comes back")
 	check_equal(source.albedo_color, Color.GREEN, "with the color set on the baked material")
+
+
+## Sources in the world shader keep their color as a Vector4 as well.
+func test_edits_on_baked_world_materials_are_kept() -> void:
+	var source := ShaderMaterial.new()
+	source.shader = QuakeMaterials.WORLD_SHADER
+	source.set_shader_parameter(&"albedo_color", Vector4(1, 0, 0, 1))
+	var baked := source.duplicate() as ShaderMaterial
+	baked.set_meta(QuakeLightmap.SOURCE_META, source)
+	baked.set_shader_parameter(&"albedo_color", Vector4(0, 1, 0, 1))
+	QuakeLightmap._source(baked)
+	check_equal(QuakeLightmap._albedo_color(source), Color.GREEN, "the color set on the baked material")

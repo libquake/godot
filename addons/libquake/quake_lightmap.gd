@@ -358,9 +358,7 @@ static func _source(material: Material) -> Material:
 	if not material or not material.has_meta(SOURCE_META):
 		return material
 	var source: Material = material.get_meta(SOURCE_META)
-	var color: Variant = material.get_shader_parameter(&"albedo_color")
-	if color is Vector4:
-		color = Color(color.x, color.y, color.z, color.w)
+	var color: Variant = _albedo_color(material)
 	var texture: Variant = material.get_shader_parameter(&"albedo_texture")
 	if source is BaseMaterial3D:
 		if color is Color and color != source.albedo_color:
@@ -368,11 +366,20 @@ static func _source(material: Material) -> Material:
 		if texture != source.albedo_texture:
 			source.albedo_texture = texture
 	elif source is ShaderMaterial:
-		if color is Color and color != source.get_shader_parameter(&"albedo_color"):
+		if color is Color and color != _albedo_color(source):
 			source.set_shader_parameter(&"albedo_color", color)
 		if texture != source.get_shader_parameter(&"albedo_texture"):
 			source.set_shader_parameter(&"albedo_texture", texture)
 	return source
+
+
+## The albedo_color of a shader material, null when it has none. A vec4 uniform comes back as Color or
+## Vector4, depending on how it was set.
+static func _albedo_color(material: ShaderMaterial) -> Variant:
+	var value: Variant = material.get_shader_parameter(&"albedo_color")
+	if value is Vector4:
+		return Color(value.x, value.y, value.z, value.w)
+	return value if value is Color else null
 
 
 ## Takes textures, colors and tiling of a StandardMaterial3D.
@@ -436,12 +443,9 @@ func _surface_color(material: Material) -> Color:
 		albedo = material.albedo_color
 	elif material is ShaderMaterial and material.shader == QuakeMaterials.WORLD_SHADER:
 		texture = material.get_shader_parameter(&"albedo_texture")
-		# a vec4 uniform comes back as Color or Vector4, depending on how it was set
-		var parameter: Variant = material.get_shader_parameter(&"albedo_color")
-		if parameter is Color:
+		var parameter: Variant = _albedo_color(material)
+		if parameter != null:
 			albedo = parameter
-		elif parameter is Vector4:
-			albedo = Color(parameter.x, parameter.y, parameter.z, parameter.w)
 	if material is BaseMaterial3D or texture:
 		color = (QuakeMaterials.average_color(texture) if texture else Color.WHITE) * albedo
 	_surface_colors[material] = color
