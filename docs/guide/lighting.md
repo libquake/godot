@@ -106,7 +106,9 @@ What is baked:
   `luxel_size` (2 / 16), the depth that suits a map darkens a small model all over. Metas on a mesh node, a node above it or the mesh itself change that per model:
   `quake_level_geometry` (true) bakes it like the maps, at `luxel_size` and with their full ambient occlusion,
   so level pieces blend in; pieces imported from maps carry it. `quake_dirt_depth_scale` sets the depth scale
-  outright, 0 for none, e.g. for a model whose texture has its ambient occlusion painted in.
+  outright, 0 for none, e.g. for a model whose texture has its ambient occlusion painted in. The samples of
+  models sit closer to their surface than those of architecture, scaled like the luxel sizes, so parts of a
+  detailed model that lie close on each other do not shadow each other.
 - Quality: `sky_samples` (64) suns per sky dome, `bounces` and `bounce_scale` (-1 as the maps say) and
   `bounce_subdivision` (64 map units per patch), fewer suns and larger patches bake faster. Maps lit for a
   compiler without bounce, like Quake's own, get quite a bit brighter with it; a `bounce_scale` of 0.3 to 0.5

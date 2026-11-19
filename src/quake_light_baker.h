@@ -24,9 +24,11 @@ namespace libquake_godot {
 
     /// colors: one per triangle, the average color of its texture for bounced light, may be empty (gray).
     /// dirt_depth_scale scales the maps' _dirtdepth on this surface, less suits small models.
+    /// surface_offset_scale scales the distance of the samples from it, detailed models need less.
     int add_surface(const godot::PackedVector3Array &vertices, const godot::PackedVector3Array &normals,
                     const godot::PackedVector2Array &uv2, const godot::PackedInt32Array &indices,
-                    float texel_scale, const godot::PackedColorArray &colors, float dirt_depth_scale);
+                    float texel_scale, const godot::PackedColorArray &colors, float dirt_depth_scale,
+                    float surface_offset_scale);
     void add_occluder(const godot::PackedVector3Array &vertices, const godot::PackedInt32Array &indices,
                       bool sky);
     void add_light(LightType type, const godot::Vector3 &position, const godot::Vector3 &direction,
@@ -105,6 +107,7 @@ namespace libquake_godot {
       std::vector<quakelib::Vec2> uvs; ///< UV2 as in the mesh
       std::vector<quakelib::Vec3> colors; ///< per triangle, may be empty
       float dirtDepthScale = 1.0f;
+      float surfaceOffsetScale = 1.0f;
       float texelScale = 1.0f;
       quakelib::Vec2 uvMin{0, 0};
       quakelib::Vec2 uvSize{0, 0};

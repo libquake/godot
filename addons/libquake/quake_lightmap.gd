@@ -125,6 +125,7 @@ func bake_to(path := "") -> bool:
 	if is_baking():
 		return false
 
+	var started := Time.get_ticks_usec()
 	var baker := QuakeLightBaker.new()
 	_surface_colors.clear()
 	baker.units_per_meter = _units_per_meter()
@@ -152,6 +153,8 @@ func bake_to(path := "") -> bool:
 			"vertices": PackedVector3Array(), "normals": PackedVector3Array(), "uv2": PackedVector2Array(),
 			"indices": PackedInt32Array(), "colors": PackedColorArray(), "nodes": [], "texel_scale": texel_scale,
 			"dirt_depth_scale": 1.0 if key is Array else _dirt_depth_scale(source, level),
+			# samples one map unit off the surface suit architecture, a detailed model's parts lie closer
+			"offset_scale": 1.0 if level else mesh_luxel_size / luxel_size,
 			# maps and their pieces share an atlas laid out by libquake, only models bring a UV2 of their own
 			"own_uv2": not level,
 		})
@@ -164,7 +167,7 @@ func bake_to(path := "") -> bool:
 		if group.indices.is_empty():
 			continue
 		var surface := baker.add_surface(group.vertices, group.normals, group.uv2, group.indices, group.texel_scale,
-				group.colors, group.dirt_depth_scale)
+				group.colors, group.dirt_depth_scale, group.offset_scale)
 		for node: Node in group.nodes:
 			surfaces.append(surface)
 			result.meshes.append(get_path_to(node))
@@ -176,6 +179,8 @@ func bake_to(path := "") -> bool:
 		for map in _maps():
 			baker.add_quake_entities(_entities(map), _to_local(map), quake_lights, worldspawn)
 
+	var times := {"prepare": _seconds_since(started)}
+	started = Time.get_ticks_usec()
 	var tree := get_tree()
 	_bake_thread = Thread.new()
 	_bake_thread.start(baker.bake)
@@ -188,6 +193,8 @@ func bake_to(path := "") -> bool:
 	_bake_thread = null
 	if error != OK:
 		return false
+	times.bake = _seconds_since(started)
+	started = Time.get_ticks_usec()
 	result.texture = ImageTexture.create_from_image(baker.get_lightmap_image())
 	result.layers = baker.get_lightmap_layers()
 	for surface in surfaces:
@@ -198,6 +205,8 @@ func bake_to(path := "") -> bool:
 		result.grid_cell_size = grid.cell_size
 		result.grid_size = grid.size
 		result.grid_rgb = grid.rgb
+	times.grid = _seconds_since(started)
+	started = Time.get_ticks_usec()
 
 	if not path.is_empty():
 		# keeps the uid the scene refers to
@@ -209,11 +218,22 @@ func bake_to(path := "") -> bool:
 		if uid != ResourceUID.INVALID_ID:
 			ResourceSaver.set_uid(path, uid)
 		result.take_over_path(path)
+	times.save = _seconds_since(started)
+	started = Time.get_ticks_usec()
 	data = result
-	print("QuakeLightmap: %d meshes, %dx%d texels in %.2f s." % [
+	times.apply = _seconds_since(started)
+	var phases := PackedStringArray()
+	for phase: String in times:
+		phases.append("%s %.2f" % [phase, times[phase]])
+	print("QuakeLightmap: %d meshes, %dx%d texels in %.2f s (%s s, libquake %.2f s)." % [
 		surfaces.size(), result.texture.get_width(), result.texture.get_height(),
+		times.values().reduce(func(sum: float, t: float) -> float: return sum + t, 0.0), ", ".join(phases),
 		baker.get_bake_milliseconds() / 1000.0])
 	return true
+
+
+static func _seconds_since(started: int) -> float:
+	return (Time.get_ticks_usec() - started) / 1000000.0
 
 
 func _apply() -> void:
