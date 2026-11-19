@@ -8,8 +8,9 @@ render_mode ambient_light_disabled, specular_disabled;
 #include "res://addons/libquake/shaders/quake_dynamic_light.gdshaderinc"
 
 uniform sampler2D albedo_texture : filter_nearest_mipmap, repeat_enable, hint_default_white;
-// gamma encoded like the texture, for materials made from a StandardMaterial3D
-uniform vec4 albedo_color = vec4(1.0);
+// for materials made from a StandardMaterial3D; source_color gives the inspector a color picker, the shader
+// turns it back to gamma encoded like the texture
+uniform vec4 albedo_color : source_color = vec4(1.0);
 uniform sampler2D emission_texture : filter_nearest_mipmap, repeat_enable, hint_default_black;
 // 128 is normal brightness, so a surface can get up to twice as bright as its texture
 uniform sampler2D lightmap_texture : filter_linear, repeat_disable;
@@ -30,7 +31,7 @@ void vertex() {
 }
 
 void fragment() {
-	vec4 albedo = texture(albedo_texture, UV) * albedo_color;
+	vec4 albedo = texture(albedo_texture, UV) * vec4(quake_linear_to_srgb(albedo_color.rgb), albedo_color.a);
 	// '{' textures: palette index 255 is a hole
 	if (albedo.a < 0.5) {
 		discard;
