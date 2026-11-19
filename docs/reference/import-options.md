@@ -21,6 +21,10 @@ Each map has its options in the Import dock. Their defaults for new maps are in 
 | `lighting/bounces` | -1 | times light bounces off surfaces, -1 as the map's `_bounce` says |
 | `lighting/bounce_scale` | -1 | brightness of the bounced light, -1 as the map's `_bouncescale` says; lower it for maps lit without bounce |
 | `lighting/bounce_subdivision` | 64 | map units per patch that bounces light, larger bake faster |
+| `lighting/luxel_samples` | 1 | samples per luxel along each side, 2 or 4 for smoother shadow edges; costs 4 or 16 times |
+| `lighting/dirt` | -1 | ambient occlusion: -1 as the map's `_dirt` says, 0 none, 1 everywhere |
+| `lighting/dirt_scale` | -1 | strength of the ambient occlusion, -1 as the map's `_dirtscale` says |
+| `lighting/dirt_samples` | 48 | rays per sample for ambient occlusion, fewer bake faster |
 | `lighting/light_grid_cell_size` | 1 | meters between the points that light models, 0 leaves the grid out |
 
 ## Surfaces

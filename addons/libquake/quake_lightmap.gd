@@ -44,6 +44,14 @@ const SOURCE_META := &"quake_lightmap_source"
 @export var light_grid_cell_size := 1.0
 
 @export_group("Quality")
+## Samples per luxel along each side, 2 or 4 for smoother shadow edges in a final bake. Costs 4 or 16 times.
+@export_range(1, 4) var luxel_samples := 1
+## Ambient occlusion: -1 as the maps' _dirt says, 0 none, 1 everywhere.
+@export_range(-1, 1) var dirt := -1
+## Strength of the ambient occlusion, -1 as the maps' _dirtscale says.
+@export_range(-1.0, 2.0, 0.05) var dirt_scale := -1.0
+## Rays per sample for ambient occlusion, fewer bake faster.
+@export_range(12, 192) var dirt_samples := 48
 ## Suns per sky dome (_sunlight2, _sunlight3), fewer bake faster.
 @export_range(8, 2048) var sky_samples := 64
 ## Times light bounces off surfaces, -1 as the maps' _bounce says.
@@ -118,6 +126,10 @@ func bake_to(path := "") -> bool:
 	baker.bounces = bounces
 	baker.bounce_subdivision = bounce_subdivision
 	baker.bounce_scale = bounce_scale
+	baker.luxel_samples = luxel_samples
+	baker.dirt = dirt
+	baker.dirt_scale = dirt_scale
+	baker.dirt_samples = dirt_samples
 	var result := QuakeLightmapData.new()
 	var groups := {}
 	for source in _static_geometry():

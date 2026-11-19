@@ -60,6 +60,10 @@ namespace libquake_godot {
         quality.bounces = bounces;
         quality.bounceSubdivision = bounce_subdivision;
         quality.bounceScale = bounce_scale;
+        quality.luxelSamples = luxel_samples;
+        quality.dirt = dirt;
+        quality.dirtScale = dirt_scale;
+        quality.dirtSamples = dirt_samples;
         options.bakeQuality = quality;
         options.textureColor = [&](const std::string &name) { return textureColor(name, lookup); };
         options.textureSize = [&](const std::string &name) { return textureSize(name, lookup); };
@@ -280,6 +284,14 @@ namespace libquake_godot {
     ClassDB::bind_method(D_METHOD("get_bounce_subdivision"), &QuakeLevel::get_bounce_subdivision);
     ClassDB::bind_method(D_METHOD("set_bounce_scale", "value"), &QuakeLevel::set_bounce_scale);
     ClassDB::bind_method(D_METHOD("get_bounce_scale"), &QuakeLevel::get_bounce_scale);
+    ClassDB::bind_method(D_METHOD("set_luxel_samples", "value"), &QuakeLevel::set_luxel_samples);
+    ClassDB::bind_method(D_METHOD("get_luxel_samples"), &QuakeLevel::get_luxel_samples);
+    ClassDB::bind_method(D_METHOD("set_dirt", "value"), &QuakeLevel::set_dirt);
+    ClassDB::bind_method(D_METHOD("get_dirt"), &QuakeLevel::get_dirt);
+    ClassDB::bind_method(D_METHOD("set_dirt_scale", "value"), &QuakeLevel::set_dirt_scale);
+    ClassDB::bind_method(D_METHOD("get_dirt_scale"), &QuakeLevel::get_dirt_scale);
+    ClassDB::bind_method(D_METHOD("set_dirt_samples", "value"), &QuakeLevel::set_dirt_samples);
+    ClassDB::bind_method(D_METHOD("get_dirt_samples"), &QuakeLevel::get_dirt_samples);
     ClassDB::bind_method(D_METHOD("set_texture_color_provider", "value"),
                          &QuakeLevel::set_texture_color_provider);
     ClassDB::bind_method(D_METHOD("get_texture_color_provider"), &QuakeLevel::get_texture_color_provider);
@@ -311,6 +323,10 @@ namespace libquake_godot {
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bounce_subdivision"), "set_bounce_subdivision",
                  "get_bounce_subdivision");
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bounce_scale"), "set_bounce_scale", "get_bounce_scale");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "luxel_samples"), "set_luxel_samples", "get_luxel_samples");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "dirt"), "set_dirt", "get_dirt");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "dirt_scale"), "set_dirt_scale", "get_dirt_scale");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "dirt_samples"), "set_dirt_samples", "get_dirt_samples");
     ADD_PROPERTY(PropertyInfo(Variant::CALLABLE, "texture_color_provider"), "set_texture_color_provider",
                  "get_texture_color_provider");
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "csg"), "set_csg", "get_csg");

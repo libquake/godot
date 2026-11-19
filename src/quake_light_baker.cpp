@@ -127,6 +127,12 @@ namespace libquake_godot {
       options.bounceScale = mapOptions.bounceScale;
       options.bounceColorScale = mapOptions.bounceColorScale;
       options.bounceStyled = mapOptions.bounceStyled;
+      options.dirt = mapOptions.dirt;
+      options.dirtDepth = mapOptions.dirtDepth;
+      options.dirtScale = mapOptions.dirtScale;
+      options.dirtGain = mapOptions.dirtGain;
+      options.dirtAngle = mapOptions.dirtAngle;
+      options.minLightDirt = mapOptions.minLightDirt;
       has_worldspawn_options = true;
     }
   }
@@ -168,6 +174,10 @@ namespace libquake_godot {
     bakeOptions.quality.bounces = bounces;
     bakeOptions.quality.bounceSubdivision = bounce_subdivision;
     bakeOptions.quality.bounceScale = bounce_scale;
+    bakeOptions.quality.luxelSamples = luxel_samples;
+    bakeOptions.quality.dirt = dirt;
+    bakeOptions.quality.dirtScale = dirt_scale;
+    bakeOptions.quality.dirtSamples = dirt_samples;
     auto baked = quakelib::BakeLightmap(input, occluders, lights, bakeOptions);
     bake_milliseconds = baked.bakeMilliseconds;
 
@@ -339,6 +349,14 @@ namespace libquake_godot {
     ClassDB::bind_method(D_METHOD("get_bounce_subdivision"), &QuakeLightBaker::get_bounce_subdivision);
     ClassDB::bind_method(D_METHOD("set_bounce_scale", "value"), &QuakeLightBaker::set_bounce_scale);
     ClassDB::bind_method(D_METHOD("get_bounce_scale"), &QuakeLightBaker::get_bounce_scale);
+    ClassDB::bind_method(D_METHOD("set_luxel_samples", "value"), &QuakeLightBaker::set_luxel_samples);
+    ClassDB::bind_method(D_METHOD("get_luxel_samples"), &QuakeLightBaker::get_luxel_samples);
+    ClassDB::bind_method(D_METHOD("set_dirt", "value"), &QuakeLightBaker::set_dirt);
+    ClassDB::bind_method(D_METHOD("get_dirt"), &QuakeLightBaker::get_dirt);
+    ClassDB::bind_method(D_METHOD("set_dirt_scale", "value"), &QuakeLightBaker::set_dirt_scale);
+    ClassDB::bind_method(D_METHOD("get_dirt_scale"), &QuakeLightBaker::get_dirt_scale);
+    ClassDB::bind_method(D_METHOD("set_dirt_samples", "value"), &QuakeLightBaker::set_dirt_samples);
+    ClassDB::bind_method(D_METHOD("get_dirt_samples"), &QuakeLightBaker::get_dirt_samples);
 
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "units_per_meter"), "set_units_per_meter",
                  "get_units_per_meter");
@@ -351,6 +369,10 @@ namespace libquake_godot {
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bounce_subdivision"), "set_bounce_subdivision",
                  "get_bounce_subdivision");
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bounce_scale"), "set_bounce_scale", "get_bounce_scale");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "luxel_samples"), "set_luxel_samples", "get_luxel_samples");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "dirt"), "set_dirt", "get_dirt");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "dirt_scale"), "set_dirt_scale", "get_dirt_scale");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "dirt_samples"), "set_dirt_samples", "get_dirt_samples");
 
     BIND_ENUM_CONSTANT(LIGHT_POINT);
     BIND_ENUM_CONSTANT(LIGHT_SPOT);

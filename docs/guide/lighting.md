@@ -5,8 +5,8 @@
 A `.map` is lit when it is imported: libquake bakes its `light` entities the way the Quake light tools do it,
 with Quake's keys (`light`, `_color`, `wait`, `delay`, `mangle` for spotlights) and the worldspawn's
 `_sunlight`, `_sun_mangle`, `_sunlight_color`, `_minlight`, the sky domes `_sunlight2` and `_sunlight3`
-(light from the whole sky, with `_sunlight2_color` and `_sunlight3_color`) and bounced light (`_bounce`,
-`_bouncescale`, `_bouncecolorscale`, `_bouncestyled`). `lighting/luxel_size` sets the map units per lightmap
+(light from the whole sky, with `_sunlight2_color` and `_sunlight3_color`), bounced light (`_bounce`,
+`_bouncescale`, `_bouncecolorscale`, `_bouncestyled`) and ambient occlusion (`_dirt` and its keys). `lighting/luxel_size` sets the map units per lightmap
 texel, 16 matches Quake, `lighting/sky_samples` the suns per sky dome, `lighting/bounces` turns bounced light
 on or off whatever the map says, `lighting/bounce_subdivision` sets the size of the patches that bounce it. A
 `.bsp` brings its lightmap.
@@ -103,7 +103,10 @@ What is baked:
 - Quality: `sky_samples` (64) suns per sky dome, `bounces` and `bounce_scale` (-1 as the maps say) and
   `bounce_subdivision` (64 map units per patch), fewer suns and larger patches bake faster. Maps lit for a
   compiler without bounce, like Quake's own, get quite a bit brighter with it; a `bounce_scale` of 0.3 to 0.5
-  keeps them closer to how they looked. Bounced light takes on the average color of
+  keeps them closer to how they looked.
+- Final bakes: `luxel_samples` 2 or 4 smooths shadow edges and costs 4 or 16 times. `dirt` (-1 as the maps
+  say, 0 none, 1 everywhere), `dirt_scale` and `dirt_samples` set the ambient occlusion that darkens corners
+  and edges; old maps without `_dirt` gain depth with `dirt` 1, especially with bounced light. Bounced light takes on the average color of
   a surface's albedo texture as much as the map's `_bouncecolorscale` says.
 - Models are lit by a light grid built from the bake, it replaces the grids of the maps it covers.
 

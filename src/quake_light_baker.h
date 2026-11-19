@@ -78,6 +78,22 @@ namespace libquake_godot {
 
     float get_bounce_scale() const { return bounce_scale; }
 
+    void set_luxel_samples(int value) { luxel_samples = value; }
+
+    int get_luxel_samples() const { return luxel_samples; }
+
+    void set_dirt(int value) { dirt = value; }
+
+    int get_dirt() const { return dirt; }
+
+    void set_dirt_scale(float value) { dirt_scale = value; }
+
+    float get_dirt_scale() const { return dirt_scale; }
+
+    void set_dirt_samples(int value) { dirt_samples = value; }
+
+    int get_dirt_samples() const { return dirt_samples; }
+
   protected:
     static void _bind_methods();
 
@@ -124,6 +140,12 @@ namespace libquake_godot {
     float bounce_subdivision = 64.0f;
     /// negative as the map says
     float bounce_scale = -1.0f;
+    /// samples per luxel along each side; ambient occlusion -1 as the map says, 0 off, 1 on; negative scale as
+    /// the map says
+    int luxel_samples = 1;
+    int dirt = -1;
+    float dirt_scale = -1.0f;
+    int dirt_samples = 48;
   };
 
 } // namespace libquake_godot

@@ -75,6 +75,14 @@ static func _options() -> Array[Dictionary]:
 		{"name": "lighting/bounces", "default": -1, "hint": PROPERTY_HINT_RANGE, "hint_string": "-1,4"},
 		# Brightness of the bounced light, -1 as the map's _bouncescale says. Lower it for maps lit without bounce.
 		{"name": "lighting/bounce_scale", "default": -1.0, "hint": PROPERTY_HINT_RANGE, "hint_string": "-1,2,0.05"},
+		# Samples per luxel along each side, 2 or 4 for smoother shadow edges. Costs 4 or 16 times.
+		{"name": "lighting/luxel_samples", "default": 1, "hint": PROPERTY_HINT_RANGE, "hint_string": "1,4"},
+		# Ambient occlusion: -1 as the map's _dirt says, 0 none, 1 everywhere.
+		{"name": "lighting/dirt", "default": -1, "hint": PROPERTY_HINT_RANGE, "hint_string": "-1,1"},
+		# Strength of the ambient occlusion, -1 as the map's _dirtscale says.
+		{"name": "lighting/dirt_scale", "default": -1.0, "hint": PROPERTY_HINT_RANGE, "hint_string": "-1,2,0.05"},
+		# Rays per sample for ambient occlusion, fewer bake faster.
+		{"name": "lighting/dirt_samples", "default": 48, "hint": PROPERTY_HINT_RANGE, "hint_string": "12,192"},
 		# Map units per patch that bounces light, larger bake faster.
 		{"name": "lighting/bounce_subdivision", "default": 64.0, "hint": PROPERTY_HINT_RANGE,
 			"hint_string": "16,512"},

@@ -128,3 +128,29 @@ func test_surface_color_of_world_materials() -> void:
 	material.set_shader_parameter(&"albedo_color", Vector4(0.5, 1.0, 1.0, 1.0))
 	check_equal(lightmap._surface_color(material), Color(0.5, 1.0, 1.0, 1.0), "texture average times albedo_color")
 	lightmap.free()
+
+
+## Ambient occlusion darkens the floor next to a wall, dirt 0 switches it off.
+func test_dirt() -> void:
+	var open := _floor_at_wall(0)
+	var dark := _floor_at_wall(1)
+	check(dark.r8 < open.r8, "darker next to the wall")
+
+
+## A floor of 8 m with a wall on its edge as an occluder, a light high above; the floor texel next to the wall.
+func _floor_at_wall(dirt: int) -> Color:
+	var baker := QuakeLightBaker.new()
+	baker.dirt = dirt
+	var square := PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)])
+	var triangles := PackedInt32Array([0, 1, 2, 0, 2, 3])
+	var floor_surface := baker.add_surface(
+			PackedVector3Array([Vector3(0, 0, 0), Vector3(8, 0, 0), Vector3(8, 0, 8), Vector3(0, 0, 8)]),
+			PackedVector3Array([Vector3.UP, Vector3.UP, Vector3.UP, Vector3.UP]), square, triangles, 1.0)
+	baker.add_occluder(PackedVector3Array([Vector3(8, 0, 0), Vector3(8, 0, 8), Vector3(8, 8, 8), Vector3(8, 8, 0)]),
+			triangles, false)
+	baker.add_light(QuakeLightBaker.LIGHT_POINT, Vector3(4, 10, 4), Vector3.DOWN, Color.WHITE, 900.0, 0.0, 0.0, false)
+	baker.bake()
+	var image := baker.get_lightmap_image()
+	var uv := baker.get_surface_uv_transform(floor_surface)
+	var at := Vector2(0.98 * uv.x + uv.z, 0.5 * uv.y + uv.w) * Vector2(image.get_size())
+	return image.get_pixelv(Vector2i(at))
