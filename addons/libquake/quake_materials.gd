@@ -8,6 +8,7 @@ enum Style { QUAKE, GODOT }
 
 const WORLD_SHADER := preload("shaders/quake_world.gdshader")
 const SKY_SHADER := preload("shaders/quake_sky.gdshader")
+const SKYBOX_SHADER := preload("shaders/quake_skybox.gdshader")
 const LIQUID_SHADER := preload("shaders/quake_liquid.gdshader")
 const MISSING_TEXTURE_PATH := "res://addons/libquake/textures/missing_texture.jpg"
 
@@ -16,6 +17,8 @@ var fullbright_energy := 1.0
 
 ## Null for the Godot style.
 var lightmap: ImageTexture
+## The six images of a skybox (QuakeSkybox), sky surfaces draw it instead of Quake's two layers.
+var skybox := {}
 ## Shown with the missing texture.
 var missing_textures := PackedStringArray()
 
@@ -98,6 +101,11 @@ func _godot_surface(texture_name: String) -> StandardMaterial3D:
 
 func _sky(texture_name: String) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
+	if not skybox.is_empty():
+		material.shader = SKYBOX_SHADER
+		for suffix: String in skybox:
+			material.set_shader_parameter(suffix, skybox[suffix])
+		return material
 	material.shader = SKY_SHADER
 	material.set_shader_parameter(&"back_layer", _albedo(texture_name))
 	var front := _files.sky_front(texture_name)

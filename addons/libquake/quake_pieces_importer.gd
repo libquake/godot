@@ -73,6 +73,8 @@ static func save_pieces(source_file: String, options: Dictionary, pieces: QuakeP
 	var materials := QuakeMaterials.new(loader.level, loader.texture_files, QuakeMaterials.Style.GODOT,
 			loader.liquid_alphas(options))
 	materials.fullbright_energy = options.get("surfaces/fullbright_energy", 1.0)
+	materials.skybox = QuakeSkybox.of_level(loader.level, options.get("textures/sky_directories",
+			QuakeImportSettings.project_default("textures/sky_directories")))
 	var as_scenes: bool = options.get("pieces/save_as", QuakeImportSettings.Pieces.SCENES) == QuakeImportSettings.Pieces.SCENES
 	var folder := pieces_folder(source_file, options)
 	var error := DirAccess.make_dir_recursive_absolute(folder)

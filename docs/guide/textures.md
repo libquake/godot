@@ -37,8 +37,15 @@ pixels unaffected by the light. `surfaces/fullbright_energy` sets how bright the
 
 | Texture | |
 |---|---|
-| `sky*` | Quake's scrolling two-layer sky, unless `surfaces/draw_sky` is off |
+| `sky*` | Quake's scrolling two-layer sky, or the map's skybox; nothing with `surfaces/draw_sky` off |
 | `*water`, `*slime`, `*lava`, `*tele` | warped liquids, covering by `surfaces/*_alpha` or the worldspawn keys `_wateralpha`, ... |
 | `{name` | a hole where the palette's last color is, or the image is transparent |
 | `clip` | not drawn, collides |
 | `trigger`, `skip`, `hint`, `nodraw`, `caulk`, `origin` | not drawn |
+
+## Skyboxes
+
+A map with the worldspawn key `sky` draws a skybox on its sky surfaces, as Quakespasm does: `"sky"
+"armagedon_"` takes `armagedon_rt`, `_bk`, `_lf`, `_ft`, `_up` and `_dn` (`.tga`, `.png`, `.jpg`, ...) from
+`textures/sky_directories`, `res://textures/env` by default. Mods keep them in `gfx/env`, copy them over as
+they are. With an image missing the map keeps Quake's two-layer sky.

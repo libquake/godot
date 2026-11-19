@@ -32,6 +32,8 @@ func build(loader: QuakeMapLoader, options: Dictionary, root_name: String) -> Qu
 	_materials = QuakeMaterials.new(_level, loader.texture_files, QuakeMaterials.Style.QUAKE,
 			loader.liquid_alphas(options))
 	_materials.fullbright_energy = options.get("surfaces/fullbright_energy", 1.0)
+	_materials.skybox = QuakeSkybox.of_level(_level, options.get("textures/sky_directories",
+			QuakeImportSettings.project_default("textures/sky_directories")))
 	_fog_style_directories = options.get("entities/ground_fog_styles",
 			QuakeImportSettings.project_default("entities/ground_fog_styles"))
 

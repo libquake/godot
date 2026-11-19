@@ -101,6 +101,8 @@ static func _options() -> Array[Dictionary]:
 		{"name": "textures/texture_directories", "default": PackedStringArray(["res://textures"])},
 		# Wads outside the project, the project's own are always found.
 		{"name": "textures/wad_directories", "default": PackedStringArray()},
+		# Skybox images named by the worldspawn key sky, as in a mod's gfx/env.
+		{"name": "textures/sky_directories", "default": PackedStringArray(["res://textures/env"])},
 		{"name": "entities/entity_classes", "default": "",
 			"hint": PROPERTY_HINT_FILE, "hint_string": "*.tres,*.res"},
 		# Style folders besides libquake's own, they win on the same name.

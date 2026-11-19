@@ -13,7 +13,8 @@ const EXECUTABLE_SETTING := "libquake/trenchbroom/executable"
 static func run(save := true, export_config := true) -> PackedStringArray:
 	var lines := PackedStringArray()
 	var texture_directories: PackedStringArray = QuakeImportSettings.project_default("textures/texture_directories")
-	for folder in [MAPS] + Array(texture_directories):
+	var sky_directories: PackedStringArray = QuakeImportSettings.project_default("textures/sky_directories")
+	for folder in [MAPS] + Array(texture_directories) + Array(sky_directories):
 		_make_folder(folder, lines)
 
 	var classes_path: String = QuakeImportSettings.project_default("entities/entity_classes")

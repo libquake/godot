@@ -41,6 +41,7 @@ Each map has its options in the Import dock. Their defaults for new maps are in 
 |---|---|---|
 | `textures/texture_directories` | `res://textures` | folders of image textures, like TrenchBroom's `textures` folder; they come before the wads |
 | `textures/wad_directories` | | folders of `.wad` files outside the project; the project's own wads are always found |
+| `textures/sky_directories` | `res://textures/env` | folders of skybox images, named by the worldspawn key `sky` as in a mod's `gfx/env` |
 
 ## Entities
 

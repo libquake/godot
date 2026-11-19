@@ -25,5 +25,6 @@ surfaces/teleport_alpha=1.0
 surfaces/fullbright_energy=1.0
 textures/texture_directories=PackedStringArray("res://textures")
 textures/wad_directories=PackedStringArray()
+textures/sky_directories=PackedStringArray("res://textures/env")
 pieces/save_as=0
 pieces/folder=""

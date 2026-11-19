@@ -122,3 +122,27 @@ func test_warnings_are_summed_up() -> void:
 	])
 	check_equal(inspector.summarize_warnings(lines),
 			PackedStringArray(["missing textures (3)", "targets that no targetname matches (2)"]), "one line per kind")
+
+
+## Six images named by the worldspawn's sky key make a skybox, one missing leaves Quake's sky.
+func test_skybox() -> void:
+	var folder := "user://skybox_test"
+	DirAccess.make_dir_recursive_absolute(folder)
+	var image := Image.create(4, 4, false, Image.FORMAT_RGB8)
+	image.fill(Color.ORANGE)
+	for suffix: String in QuakeSkybox.SUFFIXES:
+		image.save_png(folder.path_join("dusk_%s.png" % suffix))
+	var faces := QuakeSkybox.find("dusk_", PackedStringArray([folder]))
+	check_equal(faces.size(), 6, "all six faces")
+	check(faces.rt is Texture2D, "as textures")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(folder.path_join("dusk_dn.png")))
+	check(QuakeSkybox.find("dusk_", PackedStringArray([folder])).is_empty(), "nothing without the floor")
+	for suffix: String in QuakeSkybox.SUFFIXES:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(folder.path_join("dusk_%s.png" % suffix)))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(folder))
+
+	var level := QuakeLevel.new()
+	var materials := QuakeMaterials.new(level, QuakeTextureFiles.new(PackedStringArray()), QuakeMaterials.Style.GODOT, {})
+	materials.skybox = faces
+	var sky := materials.get_material("sky1") as ShaderMaterial
+	check(sky.shader == QuakeMaterials.SKYBOX_SHADER, "sky surfaces draw the skybox")
