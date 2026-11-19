@@ -209,13 +209,14 @@ func bake_to(path := "") -> bool:
 	started = Time.get_ticks_usec()
 
 	if not path.is_empty():
-		# keeps the uid the scene refers to
+		# keeps the uid the scene refers to. The editor keeps it on its own; set_uid writes the whole file a second
+		# time, seconds for a large lightmap, so only when it did not.
 		var uid := ResourceLoader.get_resource_uid(path) if ResourceLoader.exists(path) else ResourceUID.INVALID_ID
 		error = ResourceSaver.save(result, path)
 		if error != OK:
 			push_error("QuakeLightmap: could not save %s." % path)
 			return false
-		if uid != ResourceUID.INVALID_ID:
+		if uid != ResourceUID.INVALID_ID and ResourceLoader.get_resource_uid(path) != uid:
 			ResourceSaver.set_uid(path, uid)
 		result.take_over_path(path)
 	times.save = _seconds_since(started)
