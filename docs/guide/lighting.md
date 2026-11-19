@@ -102,8 +102,8 @@ What is baked:
 - `ambient_light` is added everywhere, `minimum_light` raises dark spots like `_minlight`.
 - `luxel_size` (16 map units) for the brushes of imported maps, `mesh_luxel_size` (2) for every other mesh,
   scaled by its `gi_lightmap_texel_scale`. `mesh_dirt_depth_scale` scales the maps' `_dirtdepth` on those
-  meshes, -1 like `mesh_luxel_size` to `luxel_size` (2 / 16): the depth that suits a map darkens a small model
-  all over. Metas on a mesh node, a node above it or the mesh itself change that per model:
+  meshes: 0 by default, no ambient occlusion on models, as in the Quake tools; -1 like `mesh_luxel_size` to
+  `luxel_size` (2 / 16), the depth that suits a map darkens a small model all over. Metas on a mesh node, a node above it or the mesh itself change that per model:
   `quake_level_geometry` (true) bakes it like the maps, at `luxel_size` and with their full ambient occlusion,
   so level pieces blend in; pieces imported from maps carry it. `quake_dirt_depth_scale` sets the depth scale
   outright, 0 for none, e.g. for a model whose texture has its ambient occlusion painted in.

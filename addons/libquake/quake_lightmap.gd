@@ -44,9 +44,9 @@ const DIRT_META := &"quake_dirt_depth_scale"
 @export var luxel_size := 16.0
 ## On other meshes, scaled by their gi_lightmap_texel_scale.
 @export var mesh_luxel_size := 2.0
-## Scales the maps' _dirtdepth on other meshes, small models look better with less. -1 scales it like
-## mesh_luxel_size to luxel_size.
-@export_range(-1.0, 1.0, 0.01) var mesh_dirt_depth_scale := -1.0
+## Scales the maps' _dirtdepth on other meshes. 0, no ambient occlusion, as the Quake tools treat models;
+## -1 scales it like mesh_luxel_size to luxel_size, the depth that suits a map darkens a small model all over.
+@export_range(-1.0, 1.0, 0.01) var mesh_dirt_depth_scale := 0.0
 ## Without maps; otherwise the first map's scale counts.
 @export var units_per_meter := 32.0
 ## Meters between the points that light models, 0 is none.

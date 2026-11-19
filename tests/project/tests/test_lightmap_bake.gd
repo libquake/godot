@@ -203,8 +203,10 @@ func test_dirt_depth_per_model() -> void:
 	group.add_child(node)
 	var mesh := BoxMesh.new()
 	var source := {"node": node, "mesh": mesh}
+	check_equal(lightmap._dirt_depth_scale(source, false), 0.0, "a model, none as in the Quake tools")
+	lightmap.mesh_dirt_depth_scale = -1.0
 	check_equal(lightmap._dirt_depth_scale(source, false), lightmap.mesh_luxel_size / lightmap.luxel_size,
-			"a model")
+			"-1 scales like the luxel sizes")
 	check_equal(lightmap._dirt_depth_scale(source, true), 1.0, "level geometry, as the maps")
 	mesh.set_meta(QuakeLightmap.LEVEL_META, true)
 	check(lightmap._model_meta(source, QuakeLightmap.LEVEL_META, false), "level geometry by its mesh")
