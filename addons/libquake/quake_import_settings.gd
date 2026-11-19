@@ -86,7 +86,7 @@ static func _options() -> Array[Dictionary]:
 		{"name": "surfaces/fullbright_energy", "default": 1.0, "hint": PROPERTY_HINT_RANGE, "hint_string": "0,8,0.05"},
 		# Folders of image textures, like TrenchBroom's textures folder. They come before the wads.
 		{"name": "textures/texture_directories", "default": PackedStringArray(["res://textures"])},
-		# Folders searched for .wad files besides the map's own.
+		# Folders of .wad files outside the project, the project's own wads are always found.
 		{"name": "textures/wad_directories", "default": PackedStringArray()},
 		{"name": "entities/entity_classes", "default": "",
 			"hint": PROPERTY_HINT_FILE, "hint_string": "*.tres,*.res"},

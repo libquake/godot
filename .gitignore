@@ -9,3 +9,4 @@ tests/project/scenes/*.lightmap.res
 .DS_Store
 tests/project/maps/pieces/
 tests/project/maps/pieces_as_meshes/
+tests/project/wad_lookup_test/

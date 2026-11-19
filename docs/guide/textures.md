@@ -5,8 +5,10 @@ For every texture a map uses, the import takes the first of:
 1. an image in the `textures/texture_directories` (`res://textures`): `textures/base/wall1.png` is
    `base/wall1`, and `wall1` too. Liquids may be written with `#` instead of `*` (`#water1.png`). The
    material uses the imported texture itself, so a changed image shows without reimporting the map.
-2. a wad, the ones named in the worldspawn key `wad` first, then the `.wad` files in the map's folder and in
-   `textures/wad_directories`. A `.bsp` brings its own textures.
+2. a wad: every `.wad` in the project counts, wherever it is, and those in `textures/wad_directories`, which
+   may be outside the project. The wads named in the worldspawn key `wad` come first, found by their file name
+   in any case, whatever path the key has from the mapper's machine. A texture none of them has is looked for in
+   all the others by its name. A `.bsp` brings its own textures.
 3. a grey grid, `textures/missing_texture.jpg`; the uvs follow its size of 128 pixels. The import's warnings
    name the texture.
 

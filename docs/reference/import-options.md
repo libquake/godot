@@ -32,7 +32,7 @@ Each map has its options in the Import dock. Their defaults for new maps are in 
 | Option | Default | |
 |---|---|---|
 | `textures/texture_directories` | `res://textures` | folders of image textures, like TrenchBroom's `textures` folder; they come before the wads |
-| `textures/wad_directories` | | folders searched for `.wad` files besides the map's own |
+| `textures/wad_directories` | | folders of `.wad` files outside the project; the project's own wads are always found |
 
 ## Entities
 
