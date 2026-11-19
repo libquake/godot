@@ -1,8 +1,7 @@
 @tool
 class_name QuakeEntityClasses
 extends Resource
-## The entity classes of a game: which node a Quake classname becomes, and the FGD TrenchBroom shows.
-## An exact classname wins over a prefix, a longer prefix over a shorter one.
+## A game's entity classes. An exact classname wins over a prefix, a longer prefix over a shorter one.
 
 @export var classes: Array[QuakeEntityClass] = []
 @export_tool_button("Export to TrenchBroom", "Save") var export_to_trenchbroom := _export_to_trenchbroom
@@ -25,7 +24,7 @@ func uses_script(script: Script) -> bool:
 		return entity_class and entity_class.entity_script() == script)
 
 
-## Exact classes only; the worldspawn and light keys libquake reads come along unless defined here.
+## Exact classes only, plus libquake's built-in ones unless defined here.
 func to_fgd() -> String:
 	var parts := PackedStringArray()
 	for entity_class in QuakeBuiltinEntities.classes():

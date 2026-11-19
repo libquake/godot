@@ -4,8 +4,6 @@
 
 namespace libquake_godot {
 
-  namespace {} // namespace
-
   std::vector<uint8_t> WadBytes(const quakelib::wad::cvec &colors) {
     static_assert(sizeof(quakelib::wad::color) == 4);
     std::vector<uint8_t> out(colors.size() * 4);

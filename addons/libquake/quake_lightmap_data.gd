@@ -1,17 +1,17 @@
 @tool
 class_name QuakeLightmapData
 extends Resource
-## What a QuakeLightmap baked. Paths are relative to the QuakeLightmap.
+## Paths are relative to the QuakeLightmap.
 
 @export var texture: Texture2D
 @export var meshes: Array[NodePath] = []
-## Per mesh: where its UV2 lands in texture, scale xy and offset zw.
+## Per mesh: UV2 scale xy and offset zw in texture.
 @export var uv_transforms := PackedVector4Array()
-## CSG shapes by path: their mesh with UV2, drawn in their place.
+## CSG shapes by path: their mesh with UV2.
 @export var csg_meshes: Dictionary[NodePath, Mesh] = {}
-## One RGBA layer per light style for QuakeLightStyles, empty without animated styles.
+## One RGBA layer per light style, empty without animated styles.
 @export var layers: Dictionary = {}
-## The Light3D nodes in the bake, switched off while it is applied so they do not light twice.
+## Switched off while applied, so they do not light twice.
 @export var lights: Array[NodePath] = []
 
 @export_group("Light Grid")

@@ -8,8 +8,8 @@
 
 namespace libquake_godot {
 
-  /// Quake's light styles on a lightmap split into one layer per style: composes them with the current value
-  /// of each style, ten steps per second like the engine. Only texels of styles that changed are rewritten.
+  /// Composes a lightmap from one layer per light style, ten steps per second like Quake. Only texels of
+  /// changed styles are rewritten.
   class QuakeLightStyleAnimator : public godot::RefCounted {
     GDCLASS(QuakeLightStyleAnimator, godot::RefCounted)
 

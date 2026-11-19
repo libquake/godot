@@ -1,14 +1,11 @@
 @tool
 class_name QuakeImportSettings
 extends RefCounted
-## Import options of Quake maps. Their defaults live in Project Settings > libquake, a newly imported map
-## starts with them and can override every one in the Import dock.
+## Import options of Quake maps, with their defaults in Project Settings > libquake.
 
 const PREFIX := "libquake/"
 const PIVOTS := "Map Origin,Center,Bottom Center,Bottom Corner"
-## Groups pieces have no use for: they are lit by Godot and have no entities.
 const LEVEL_ONLY_GROUPS := ["lighting", "entities", "editor"]
-## Groups only pieces have.
 const PIECES_ONLY_GROUPS := ["pieces"]
 const SAVE_PIECES_AS := "Scenes,Meshes"
 enum Pieces { SCENES, MESHES }
@@ -41,7 +38,6 @@ static func pieces_options() -> Array[Dictionary]:
 	return _import_options(options)
 
 
-## The project's default for an option, e.g. "entities/entity_classes".
 static func project_default(name: String) -> Variant:
 	for option in _options():
 		if option.name == name:
@@ -63,40 +59,39 @@ static func _import_options(options: Array) -> Array[Dictionary]:
 
 static func _options() -> Array[Dictionary]:
 	return [
-		# Quake units per Godot meter, 32 makes the Quake player 1.75 m tall.
+		# 32 makes the Quake player 1.75 m tall.
 		{"name": "geometry/units_per_meter", "default": 32.0},
 		# Removes faces hidden inside other brushes of the same entity.
 		{"name": "geometry/csg", "default": true},
-		# Origin of brush entities. An origin brush or the key _pivot on an entity wins.
+		# Origin of brush entities, an origin brush or _pivot wins.
 		{"name": "geometry/pivot", "default": QuakeLevel.PIVOT_BOTTOM_CENTER,
 			"hint": PROPERTY_HINT_ENUM, "hint_string": PIVOTS},
 		{"name": "lighting/bake", "default": true},
-		# Map units per lightmap texel, 16 matches Quake.
+		# Map units per lightmap texel.
 		{"name": "lighting/luxel_size", "default": 16.0},
-		# Meters between the points that light models, 0 leaves the grid out.
+		# Meters between the points that light models, 0 is none.
 		{"name": "lighting/light_grid_cell_size", "default": 1.0},
-		# Off for maps that are not sealed and show the WorldEnvironment's sky instead.
+		# Off shows the WorldEnvironment's sky.
 		{"name": "surfaces/draw_sky", "default": true},
-		# How much liquids cover, the worldspawn keys _wateralpha, _slimealpha, ... win.
+		# The worldspawn keys _wateralpha, ... win.
 		{"name": "surfaces/water_alpha", "default": 0.6, "hint": PROPERTY_HINT_RANGE, "hint_string": "0,1,0.01"},
 		{"name": "surfaces/slime_alpha", "default": 0.7, "hint": PROPERTY_HINT_RANGE, "hint_string": "0,1,0.01"},
 		{"name": "surfaces/lava_alpha", "default": 0.85, "hint": PROPERTY_HINT_RANGE, "hint_string": "0,1,0.01"},
 		{"name": "surfaces/teleport_alpha", "default": 1.0, "hint": PROPERTY_HINT_RANGE, "hint_string": "0,1,0.01"},
-		# Brightness of fullbright texture pixels, above 1 they bloom with the Environment's glow.
+		# Above 1 fullbright pixels bloom.
 		{"name": "surfaces/fullbright_energy", "default": 1.0, "hint": PROPERTY_HINT_RANGE, "hint_string": "0,8,0.05"},
-		# Folders of image textures, like TrenchBroom's textures folder. They come before the wads.
+		# Image textures, used before the wads.
 		{"name": "textures/texture_directories", "default": PackedStringArray(["res://textures"])},
-		# Folders of .wad files outside the project, the project's own wads are always found.
+		# Wads outside the project, the project's own are always found.
 		{"name": "textures/wad_directories", "default": PackedStringArray()},
 		{"name": "entities/entity_classes", "default": "",
 			"hint": PROPERTY_HINT_FILE, "hint_string": "*.tres,*.res"},
-		# Folders of QuakeGroundFogStyles, named by their file, besides libquake's own. They win on the same name.
+		# Style folders besides libquake's own, they win on the same name.
 		{"name": "entities/ground_fog_styles", "default": PackedStringArray()},
-		# The collision of brushes in the editor; triggers and liquids show either way.
+		# Brush collision in the editor, triggers and liquids always show.
 		{"name": "editor/show_hulls", "default": false},
-		# What a map of pieces saves each piece as, to drag into a scene: a MeshInstance3D with its collision, or
-		# the bare mesh, which Godot drops as a MeshInstance3D.
+		# A scene with collision, or the bare mesh.
 		{"name": "pieces/save_as", "default": Pieces.SCENES, "hint": PROPERTY_HINT_ENUM, "hint_string": SAVE_PIECES_AS},
-		# Where the pieces go, empty is a folder named like the map next to it.
+		# Empty is a folder named like the map, next to it.
 		{"name": "pieces/folder", "default": "", "hint": PROPERTY_HINT_DIR},
 	]

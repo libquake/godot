@@ -1,8 +1,7 @@
 @tool
 class_name QuakeMapWatcher
 extends Node
-## Reimports a map as soon as TrenchBroom saves it, also while the editor is in the background, where Godot
-## itself only looks at the files when it gets the focus back.
+## Reimports a map when TrenchBroom saves it, also while the editor is in the background.
 
 const SETTING := "libquake/editor/watch_maps"
 const EXTENSIONS := ["map", "bsp"]
@@ -42,7 +41,6 @@ func _check() -> void:
 		file_system.reimport_files(changed)
 
 
-## The maps of the project, read again whenever the file system changes.
 func _collect() -> void:
 	var paths := PackedStringArray()
 	_find_maps(EditorInterface.get_resource_filesystem().get_filesystem(), paths)

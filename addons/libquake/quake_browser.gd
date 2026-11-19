@@ -1,20 +1,17 @@
 @tool
 extends VBoxContainer
-## The Quake panel: shows what is selected in the FileSystem dock, the pieces of a map to drag into the 3D
-## viewport, or the textures of a wad.
+## The Quake panel: the pieces of the selected map, to drag into the viewport, or a wad's textures.
 
-## Extract Textures was pressed for the wad shown.
 signal extract_requested(wad_path: String)
 
 const DEFAULT_SIZE := 96.0
 
-## The file shown, empty before one was selected.
 var path := ""
 
 var _names := PackedStringArray()
 var _icons: Array[Texture2D] = []
 var _tooltips := PackedStringArray()
-## The file each entry drags, empty for textures.
+## Empty for textures.
 var _files := PackedStringArray()
 
 var _title := Label.new()
@@ -59,7 +56,6 @@ func _init() -> void:
 	_list.same_column_width = true
 	_list.max_text_lines = 1
 	_list.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	# the textures are pixel art, so are the pieces' previews
 	_list.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_list.set_drag_forwarding(_drag, Callable(), Callable())
 	add_child(_list)
@@ -114,7 +110,7 @@ func _resize(value: float) -> void:
 	_list.fixed_column_width = roundi(value) + 8
 
 
-## Pieces drag as their file, like from the FileSystem dock: the viewport places them under the mouse.
+## Pieces drag as files, like from the FileSystem dock.
 func _drag(at_position: Vector2) -> Variant:
 	var item := _list.get_item_at_position(at_position, true)
 	if item < 0:

@@ -9,9 +9,8 @@
 
 namespace libquake_godot {
 
-  /// Bakes light the way the Quake light tools do for the meshes of a Godot scene, any shape: every surface
-  /// gets a rectangle of one atlas and is placed in it through its UV2. Positions are in meters, the bake
-  /// itself in map units (units_per_meter), so Quake lights and luxel sizes keep their meaning.
+  /// Quake-style light for the meshes of a Godot scene, each surface in one atlas through its UV2. Positions are
+  /// in meters, the bake works in map units so Quake lights and luxel sizes keep their meaning.
   class QuakeLightBaker : public godot::RefCounted {
     GDCLASS(QuakeLightBaker, godot::RefCounted)
 
@@ -29,8 +28,7 @@ namespace libquake_godot {
                       bool sky);
     void add_light(LightType type, const godot::Vector3 &position, const godot::Vector3 &direction,
                    const godot::Color &color, float intensity, float range, float cone_angle, bool shadows);
-    /// The worldspawn settings (_minlight, _anglescale, _range) of the first map with worldspawn on apply to
-    /// the whole bake, _minlight takes the highest of all maps.
+    /// The first map's _anglescale and _range apply to the whole bake, _minlight is the highest of all.
     void add_quake_entities(const godot::TypedArray<godot::Dictionary> &entities,
                             const godot::Transform3D &transform, bool add_lights, bool worldspawn);
 

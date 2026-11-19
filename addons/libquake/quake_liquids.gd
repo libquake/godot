@@ -1,7 +1,7 @@
 @tool
 class_name QuakeLiquids
 extends RefCounted
-## Liquid kinds by texture name and how they look, after quaken and Quake's v_cshift.
+## Liquid kinds by texture name and their look, after quaken and Quake's v_cshift.
 
 const GROUP := &"quake_liquid"
 const KIND_META := &"quake_liquid_kind"
@@ -10,7 +10,7 @@ const COLOR_META := &"quake_liquid_color"
 ## above 1 the surface glows
 const BRIGHTNESS := {"lava": 3.0}
 
-## worldspawn keys of modern Quake engines, they win over the import options
+## worldspawn keys of modern engines, they win over the import options
 const ALPHA_KEYS := {
 	"water": "_wateralpha",
 	"slime": "_slimealpha",
@@ -18,14 +18,14 @@ const ALPHA_KEYS := {
 	"teleport": "_telealpha",
 }
 
-## shift is the share of the liquid's color over the image, Quake's cshift percent
+## shift is Quake's cshift percent
 const VIEWS := {
 	"water": {"shift": 128.0 / 255.0, "fog_density": 0.2},
 	"slime": {"shift": 150.0 / 255.0, "fog_density": 0.35},
 	"lava": {"shift": 150.0 / 255.0, "fog_density": 0.6},
 }
 
-## Quake's cshift colors, used when the liquid texture has no pixels
+## for liquid textures without pixels
 const FALLBACK_COLORS := {
 	"water": Color8(130, 80, 50),
 	"slime": Color8(0, 25, 5),

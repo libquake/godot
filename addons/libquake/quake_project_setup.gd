@@ -1,8 +1,7 @@
 @tool
 class_name QuakeProjectSetup
 extends RefCounted
-## Project > Tools > Set up libquake Project: what a project needs to make maps, filled in where it is missing.
-## Nothing that is there gets changed, so running it again is harmless.
+## Set up libquake Project: fills in what is missing, changes nothing that is there.
 
 const MAPS := "res://maps"
 const ENTITY_CLASSES := "res://entity_classes.tres"
@@ -10,8 +9,7 @@ const FOG_STYLES := "res://fog_styles"
 const EXECUTABLE_SETTING := "libquake/trenchbroom/executable"
 
 
-## Returns what it did and what is left to the user, one line each. save writes project.godot,
-## export_config the TrenchBroom game config.
+## Returns a line per thing done or left to do.
 static func run(save := true, export_config := true) -> PackedStringArray:
 	var lines := PackedStringArray()
 	var texture_directories: PackedStringArray = QuakeImportSettings.project_default("textures/texture_directories")
@@ -33,7 +31,7 @@ static func run(save := true, export_config := true) -> PackedStringArray:
 	if save:
 		ProjectSettings.save()
 
-	# a bare name is looked up on the PATH when it starts
+	# a bare name is looked up on the PATH
 	var executable: String = ProjectSettings.get_setting(EXECUTABLE_SETTING, "")
 	if executable.is_empty() or (executable.is_absolute_path() and not FileAccess.file_exists(executable)
 			and not DirAccess.dir_exists_absolute(executable)):

@@ -1,10 +1,8 @@
 @tool
 class_name QuakeTextureFiles
 extends RefCounted
-## Textures as image files, the way TrenchBroom reads them from the textures folder of a game:
-## textures/base/wall1.png is "base/wall1" and is also found as "wall1". Quake engines write "#" in file
-## names for the "*" of liquids. Next to an image, <name>_luma or <name>_glow holds its glowing pixels
-## and <name>_front the cloud layer of a sky.
+## Image textures as TrenchBroom reads them: textures/base/wall1.png is "base/wall1" and "wall1", "#" stands
+## for "*". <name>_luma or _glow holds glowing pixels, <name>_front a sky's clouds.
 
 const EXTENSIONS := ["png", "tga", "jpg", "jpeg", "webp", "bmp"]
 const COMPANION_SUFFIXES := ["_luma", "_glow", "_front"]
@@ -48,7 +46,7 @@ func _companion(texture_name: String, suffix: String) -> Texture2D:
 	return _load(companion) if FileAccess.file_exists(companion) else null
 
 
-## Images added together with the map are not imported yet when the map is, they are read directly then.
+## Images added with the map are not imported yet, so they are read directly.
 static func _load(path: String) -> Texture2D:
 	var imported := ResourceLoader.load(path, "Texture2D") if ResourceLoader.exists(path) else null
 	if imported:

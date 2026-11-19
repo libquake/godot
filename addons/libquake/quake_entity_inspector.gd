@@ -1,8 +1,6 @@
 @tool
 extends EditorInspectorPlugin
-## Shows the Quake entities behind the nodes of an imported map. On a QuakeMap: a list of its entities, the
-## picked one with its keys, its connections drawn in the viewport by the QuakeMapGizmo. On an entity node
-## (with Editable Children on the map): its keys.
+## On a QuakeMap: its entities, the picked one's keys and connections. On an entity node: its keys.
 
 const CONNECTION_KEYS := ["target", "targetname", "killtarget"]
 
@@ -61,7 +59,7 @@ func _warnings(lines: PackedStringArray) -> Control:
 	return label
 
 
-## Keys as written in the map; target, targetname and killtarget are buttons to the entities on the other end.
+## target, targetname and killtarget are buttons to the other end.
 func _entity_panel(node: Node, open: Callable) -> Control:
 	var panel := VBoxContainer.new()
 	var title := Label.new()
@@ -114,7 +112,6 @@ static func _entities(map: QuakeMap) -> Array[Node]:
 	return entities
 
 
-## The entities that fire targetname.
 static func _sources(map: QuakeMap, targetname: String) -> Array[Node]:
 	var sources: Array[Node] = []
 	for node in _entities(map):

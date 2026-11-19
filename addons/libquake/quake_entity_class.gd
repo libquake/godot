@@ -1,7 +1,7 @@
 @tool
 class_name QuakeEntityClass
 extends Resource
-## One entity class: which node the import makes of it and how TrenchBroom shows it (FGD).
+## The node the import makes of a classname, and its FGD entry.
 
 enum Type { POINT, BRUSH }
 
@@ -19,8 +19,7 @@ enum Type { POINT, BRUSH }
 @export var exclude := false
 
 @export_group("TrenchBroom")
-## Keys with their default values, on top of the @export variables of the script, which are keys too.
-## The type of a value picks the FGD type: int, float, bool, String, Color (_color style, 0-1), Vector3.
+## Keys besides the script's @export variables. The value's type picks the FGD type.
 @export var properties: Dictionary[String, Variant] = {}
 @export var property_descriptions: Dictionary[String, String] = {}
 @export var color := Color(0.8, 0.8, 0.8)
@@ -28,7 +27,7 @@ enum Type { POINT, BRUSH }
 @export var size := AABB(Vector3(-8, -8, -8), Vector3(16, 16, 16))
 
 
-## The keys of the FGD: the @export variables of node_script or of the scene's root, then properties.
+## The script's @export variables, then properties.
 func all_properties() -> Dictionary:
 	var keys := {}
 	var script := entity_script()
@@ -46,8 +45,7 @@ func matches(entity_classname: String) -> bool:
 	return entity_classname.begins_with(classname.trim_suffix("*")) if is_prefix() else entity_classname == classname
 
 
-## description and property_descriptions win, without them the ## comments of the script: of the class and of
-## its @export variables.
+## Falls back to the script's ## comments.
 func to_fgd() -> String:
 	var docs := script_docs(entity_script())
 	var header := "@PointClass size(%s, %s)" % [_vector(size.position), _vector(size.end)] if type == Type.POINT else "@SolidClass"
@@ -62,7 +60,6 @@ func to_fgd() -> String:
 	return "\n".join(lines)
 
 
-## node_script, or the script of the scene's root.
 func entity_script() -> Script:
 	if node_script:
 		return node_script
@@ -75,8 +72,8 @@ func entity_script() -> Script:
 	return null
 
 
-## The ## comments of a script and the scripts it extends: "" the class's, the others by variable. Read from its
-## source, so only where that is kept: in the editor, where the FGD is made.
+## The ## comments of a script and its bases: "" the class's, the others by variable. Needs the source, so
+## editor only.
 static func script_docs(script: Script) -> Dictionary:
 	var docs := {}
 	if not script:
@@ -84,11 +81,10 @@ static func script_docs(script: Script) -> Dictionary:
 	var base := script.get_base_script()
 	if base:
 		docs = script_docs(base)
-		# the class text is the script's own
 		docs.erase("")
 	var variable := RegEx.create_from_string("\\bvar\\s+(\\w+)")
 	var comment := PackedStringArray()
-	# like Godot's: the class's comment is right below class_name or extends
+	# as in Godot, the class comment follows class_name or extends
 	var header := false
 	var class_comment := false
 	var exported := false

@@ -1,11 +1,10 @@
 class_name QuakeEntity
 extends RefCounted
-## For the scripts of imported entities: their keys, read as written in the map and parsed on the way, and
-## Quake's way of connecting entities. Firing an entity triggers every entity of its map whose "targetname"
-## is its "target"; they get _quake_triggered(activator) if they have that method.
+## Helpers for entity scripts: parsed keys and Quake's target/targetname firing, which calls
+## _quake_triggered(activator) on the targets.
 
 const TRIGGERED := &"_quake_triggered"
-## The types a key can be parsed to, also the types of @export variables that become keys.
+## Also the @export types that become keys.
 const KEY_TYPES: Array[int] = [TYPE_STRING, TYPE_INT, TYPE_FLOAT, TYPE_BOOL, TYPE_VECTOR3, TYPE_COLOR]
 
 
@@ -25,7 +24,7 @@ static func get_int(node: Node, key: String, default := 0) -> int:
 	return _read(node, key, TYPE_INT, default)
 
 
-## As written: Quake units and axes, e.g. "mangle". Positions of entities are in the "quake_entity" meta.
+## As written, in Quake units and axes. The position is in the "quake_entity" meta.
 static func get_vector(node: Node, key: String, default := Vector3.ZERO) -> Vector3:
 	return _read(node, key, TYPE_VECTOR3, default)
 
@@ -34,8 +33,7 @@ static func get_color(node: Node, key: String, default := Color.WHITE) -> Color:
 	return _read(node, key, TYPE_COLOR, default)
 
 
-## A key as written in the map, as one of KEY_TYPES; null if it does not parse. Quake tools write colors as
-## 0-1 or 0-255, booleans as 0 and 1.
+## Null if it does not parse. Colors may be 0-1 or 0-255.
 static func parse(text: String, type: int) -> Variant:
 	match type:
 		TYPE_STRING:
@@ -57,15 +55,14 @@ static func parse(text: String, type: int) -> Variant:
 	return null
 
 
-## Sets every @export variable of node that has a key of the same name, parsed to the variable's type.
-## Quake units per meter of the map the node belongs to; outside a map (pieces) the project's
-## default of geometry/units_per_meter.
+## Sets every @export variable of node from the key of the same name.
+## Of the node's map, outside a map the project's geometry/units_per_meter.
 static func units_per_meter(node: Node) -> float:
 	var map := QuakeMap.of(node)
 	return map.units_per_meter if map else QuakeImportSettings.project_default("geometry/units_per_meter")
 
 
-## A length or speed in map units, like the keys speed or lip, in meters: the scale of the node's map.
+## A length or speed in map units, e.g. speed or lip, in meters.
 static func meters(node: Node, units: float) -> float:
 	return units / units_per_meter(node)
 
@@ -83,7 +80,6 @@ static func apply_keys(node: Node) -> void:
 			node.set(property.name, value)
 
 
-## The @export variables of a script that can be keys, with their defaults.
 static func script_keys(script: Script) -> Dictionary:
 	var keys := {}
 	for property in script.get_script_property_list():
@@ -107,7 +103,7 @@ static func has_spawnflag(node: Node, flag: int) -> bool:
 	return get_int(node, "spawnflags") & flag != 0
 
 
-## Triggers the targets of node, after its "delay" in seconds like Quake's SUB_UseTargets.
+## Like Quake's SUB_UseTargets, after the node's "delay".
 static func fire(node: Node, activator: Node = null) -> void:
 	var delay := get_float(node, "delay")
 	if delay > 0.0:

@@ -1,7 +1,6 @@
 @tool
 extends EditorImportPlugin
-## Imports .map and .bsp files as scenes. Saving the map in TrenchBroom reimports it, lights included.
-## A map with the worldspawn key _meshlib is switched to the pieces importer instead.
+## Imports .map and .bsp files as scenes. Maps with the worldspawn key _meshlib switch to the pieces importer.
 
 
 
@@ -76,8 +75,7 @@ func _import(source_file: String, save_path: String, options: Dictionary,
 	return _save(root, save_path)
 
 
-## Maps reimport on every save in TrenchBroom and most keep warnings for good (entities without a class), so
-## a toast only comes for what is new since the map's last import in this session.
+## Toasts only warnings that are new since the map's last import, maps reimport on every save.
 static var _last_warnings := {}
 
 
@@ -87,7 +85,7 @@ static func _announce(source_file: String, warnings: PackedStringArray) -> void:
 	if added.is_empty():
 		return
 	var text := added[0] if added.size() == 1 else "%d new import warnings" % added.size()
-	# imports may run in a thread, the toaster wants the main one
+	# imports may run in a thread
 	_toast.call_deferred("%s: %s. The map's inspector lists them." % [source_file.get_file(), text])
 
 
@@ -104,8 +102,8 @@ func _save(root: Node, save_path: String) -> Error:
 	return ResourceSaver.save(scene, "%s.%s" % [save_path, _get_save_extension()])
 
 
-## What "Import As > Quake Pieces" does: change the importer in the .import file and reimport.
-## Both wait until the current import is over, the editor writes the .import file itself at its end.
+## Like Import As: changes the importer in the .import file and reimports, after the current import, which
+## writes the .import file at its end.
 static func _switch_to_pieces(source_file: String) -> void:
 	var file_system := EditorInterface.get_resource_filesystem()
 	file_system.resources_reimported.connect(func(_resources: PackedStringArray) -> void:

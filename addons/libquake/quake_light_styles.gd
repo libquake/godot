@@ -1,12 +1,11 @@
 class_name QuakeLightStyles
 extends Node
-## Animates the light styles of a lightmap at runtime: Quake's flickering and pulsing lights, and the
-## switchable ones (styles 32 and up, lights with a targetname). The editor shows the lightmap at rest.
+## Animates a lightmap's light styles in the game, switchable ones from 32 up.
 
 const GROUP := &"quake_light_styles"
 
 @export var lightmap: ImageTexture
-## One RGBA layer per style, as QuakeLevel.get_lightmap_layers() gives them.
+## One RGBA layer per style.
 @export var layers: Dictionary
 
 var _animator := QuakeLightStyleAnimator.new()
@@ -35,8 +34,7 @@ func _process(delta: float) -> void:
 		lightmap.update(_image)
 
 
-## Quake's lightstyle(): one letter per tenth of a second, "a" is dark, "m" normal, "z" double. A switchable
-## light goes off with "a" and on with "m".
+## Quake's lightstyle(): a letter per tenth of a second, "a" dark, "m" normal, "z" double.
 func set_style(style: int, pattern: String) -> void:
 	_animator.set_style(style, pattern)
 

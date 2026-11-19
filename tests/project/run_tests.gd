@@ -1,9 +1,9 @@
 extends SceneTree
-## Runs the test_ methods of every script in res://tests, prints the failures and quits with their count. An error
-## while a test runs fails it too: a script error ends the test early, and it would pass otherwise.
+## Runs the test_ methods in res://tests and quits with the number of failures. A logged error fails a test,
+## a script error would end it early and pass.
 
 
-## Collects the errors Godot logs, script errors included; warnings are left alone.
+## Errors only, warnings are left alone.
 class ErrorLog extends Logger:
 	var _errors := PackedStringArray()
 	var _mutex := Mutex.new()
@@ -16,7 +16,6 @@ class ErrorLog extends Logger:
 		_errors.append("%s (%s:%d in %s)" % [rationale if rationale else code, file, line, function])
 		_mutex.unlock()
 
-	## The errors since the last call.
 	func take() -> PackedStringArray:
 		_mutex.lock()
 		var taken := _errors

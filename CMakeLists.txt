@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(APPLE)
-  # universal, one binary for both kinds of Mac. project() made the cache entries already, empty
+  # universal; FORCE, project() already made the cache entries
   set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
   set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "" FORCE)
 endif()
@@ -24,8 +24,7 @@ FetchContent_Declare(
 set(GODOTCPP_DISABLE_EXCEPTIONS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(godot-cpp)
 
-# libquake only builds as a shared library, the extension compiles the sources libquake lists itself
-# into a static library instead. A QLIB_SHARED option in libquake would make this unnecessary.
+# libquake only builds as a shared library, so its sources are compiled into a static one here
 file(READ "${LIBQUAKE_DIR}/src/CMakeLists.txt" LIBQUAKE_SOURCE_LIST)
 string(REGEX MATCHALL "[A-Za-z0-9_/]+\\.cpp" LIBQUAKE_SOURCES "${LIBQUAKE_SOURCE_LIST}")
 list(TRANSFORM LIBQUAKE_SOURCES PREPEND "${LIBQUAKE_DIR}/src/")

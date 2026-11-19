@@ -1,16 +1,15 @@
 class_name QuakeLightReceiver
 extends Node
-## Lights a model with the light of the level where it stands, like Quake does: samples the level's
-## QuakeLightGrid at the parent's position and hands the value to every GeometryInstance3D below model
-## as the instance uniform quake_light. Their materials use shaders/quake_model.gdshaderinc.
+## Samples the QuakeLightGrid at the parent and sets the instance uniform quake_light on everything below
+## model. Their materials use shaders/quake_model.gdshaderinc.
 
 const PARAMETER := &"quake_light"
 
 @export var model: Node3D
-## Where the light is read, relative to the parent. Quake reads it at the model's origin.
+## Relative to the parent.
 @export var offset := Vector3(0.0, 0.25, 0.0)
 @export var brightness := 1.0
-## Quake keeps the player's weapon at least this bright (minlight 24 of 128 is about 0.2).
+## Quake's weapon minlight, 24 of 128, is about 0.2.
 @export var minimum_light := 0.0
 @export var smoothing := 8.0
 
@@ -38,7 +37,7 @@ func _process(delta: float) -> void:
 		geometry.set_instance_shader_parameter(PARAMETER, value)
 
 
-## The sampled light, raised to minimum_light without changing its color.
+## Raised to minimum_light, keeping the color.
 func _model_light() -> Vector3:
 	var value := Vector3(light.r, light.g, light.b) * brightness
 	var strength := maxf(value.x, maxf(value.y, value.z))
@@ -47,7 +46,7 @@ func _model_light() -> Vector3:
 	return Vector3.ONE * minimum_light if strength <= 0.0 else value * (minimum_light / strength)
 
 
-## Models change, e.g. when a weapon is put into its mount after this node is ready.
+## Models may be added later, e.g. a weapon.
 func _refresh_geometry() -> void:
 	_geometry.clear()
 	_collect_geometry(model)

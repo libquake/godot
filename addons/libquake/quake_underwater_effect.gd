@@ -1,6 +1,6 @@
 class_name QuakeUnderwaterEffect
 extends CanvasLayer
-## Tints, wobbles and fogs the view while the camera is inside a liquid of an imported Quake level.
+## Tints, wobbles and fogs the view while the camera is inside a liquid.
 
 const SHADER := preload("shaders/quake_underwater.gdshader")
 

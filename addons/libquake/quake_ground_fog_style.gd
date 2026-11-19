@@ -1,14 +1,12 @@
 @tool
 class_name QuakeGroundFogStyle
 extends Resource
-## The look of QuakeGroundFog, shared by every fog that uses it. Styles are found by their file name: libquake's
-## own in ground_fog_styles/, then those in the folders of entities/ground_fog_styles, which win on the same
-## name. A func_groundfog picks one with its style key, without one or with an unknown one it looks like the
-## style named default.
+## The look of QuakeGroundFog. Found by file name, the project's styles in entities/ground_fog_styles win over
+## libquake's. Unknown names look like default.
 
 const DEFAULT := "default"
 const BUILTIN_DIRECTORY := "res://addons/libquake/ground_fog_styles"
-## The variables the shader gets as they are, its uniforms have the same names.
+## Passed to the shader uniforms of the same name.
 const PARAMS: Array[StringName] = [
 	&"fog_height",
 	&"top_softness",
@@ -30,7 +28,7 @@ const PARAMS: Array[StringName] = [
 ]
 
 @export_group("Look")
-## Meters the fog stands above the box's floor, before the hills.
+## Meters above the box's floor, before the hills.
 @export_range(0.05, 4.0, 0.01) var fog_height := 0.6:
 	set(value):
 		fog_height = value
@@ -53,14 +51,14 @@ const PARAMS: Array[StringName] = [
 	set(value):
 		edge_fade = value
 		emit_changed()
-## Meters around the camera without fog, so crouching in it does not black out the view.
+## Meters around the camera without fog.
 @export_range(0.0, 4.0, 0.05) var camera_fade := 0.5:
 	set(value):
 		camera_fade = value
 		emit_changed()
 
 @export_group("Hills")
-## Grayscale, tiled across the world, the hills are read from it. Empty gives a flat top.
+## Grayscale hill map, tiled across the world. Empty is flat.
 @export var noise_texture: Texture2D = preload("textures/quake_ground_fog_noise.tres"):
 	set(value):
 		noise_texture = value
@@ -70,7 +68,7 @@ const PARAMS: Array[StringName] = [
 	set(value):
 		hill_amount = value
 		emit_changed()
-## Hills per meter, bigger is smaller hills.
+## Hills per meter.
 @export_range(0.01, 2.0, 0.01) var hill_scale := 0.15:
 	set(value):
 		hill_scale = value
@@ -79,7 +77,6 @@ const PARAMS: Array[StringName] = [
 	set(value):
 		wind = value
 		emit_changed()
-## How fast the hills change shape.
 @export_range(0.0, 1.0, 0.01) var morph_speed := 0.15:
 	set(value):
 		morph_speed = value
@@ -111,26 +108,25 @@ const PARAMS: Array[StringName] = [
 	set(value):
 		anim_fps = value
 		emit_changed()
-## Samples along the view ray, the dither hides the steps between them.
+## Samples along the view ray.
 @export_range(1, 32) var steps := 8:
 	set(value):
 		steps = value
 		emit_changed()
 
 
-## Meters above the box's floor the highest hill reaches, the box has to be that high.
+## Meters above the box's floor the highest hill reaches.
 func top() -> float:
 	return fog_height * (1.0 + hill_amount)
 
 
-## The style of that name, null if there is none. directories: the project's folders, by default its
-## entities/ground_fog_styles.
+## Null if there is none. directories defaults to entities/ground_fog_styles.
 static func find(style_name: String, directories: Variant = null) -> QuakeGroundFogStyle:
 	var path: String = _paths(directories).get(style_name, "")
 	return load(path) if not path.is_empty() else null
 
 
-## Every style's name, default first: the choices of the style key.
+## Default first.
 static func names(directories: Variant = null) -> PackedStringArray:
 	var result := PackedStringArray(_paths(directories).keys())
 	result.sort()
@@ -140,7 +136,7 @@ static func names(directories: Variant = null) -> PackedStringArray:
 	return result
 
 
-## Name to path, libquake's own first so the project's replace them.
+## Name to path, the project's override libquake's.
 static func _paths(directories: Variant) -> Dictionary:
 	var folders := PackedStringArray([BUILTIN_DIRECTORY])
 	folders.append_array(directories if directories != null \
@@ -149,7 +145,7 @@ static func _paths(directories: Variant) -> Dictionary:
 	for folder in folders:
 		if not DirAccess.dir_exists_absolute(folder):
 			continue
-		# list_directory sees through the remaps of an exported game
+		# sees through the remaps of an exported game
 		for file in ResourceLoader.list_directory(folder):
 			if file.get_extension() not in ["tres", "res"]:
 				continue

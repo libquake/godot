@@ -1,9 +1,7 @@
 @tool
 extends EditorImportPlugin
-## Imports a .map of pieces, chosen with "Import As" in the Import dock. Every TrenchBroom group becomes one piece
-## named like the group, with its pivot as the piece's origin. Brush entities outside groups get their own piece,
-## loose world brushes the piece "worldspawn". Each piece is saved as a file of its own to drag into a scene, the
-## imported QuakePieces lists them.
+## Imports a map of pieces: each TrenchBroom group, brush entity outside groups and the loose world brushes
+## become a file of their own, with the pivot as origin.
 
 
 func _get_importer_name() -> String:
@@ -66,7 +64,6 @@ func _import(source_file: String, save_path: String, options: Dictionary,
 	return ResourceSaver.save(pieces, "%s.%s" % [save_path, _get_save_extension()])
 
 
-## Saves every piece of the map and lists it in pieces, its mesh in meshes.
 static func save_pieces(source_file: String, options: Dictionary, pieces: QuakePieces, meshes: Array[Mesh],
 		gen_files: Array[String]) -> Error:
 	var loader := QuakeMapLoader.new(source_file, options, true)
@@ -110,20 +107,18 @@ static func save_pieces(source_file: String, options: Dictionary, pieces: QuakeP
 	return OK
 
 
-## The folder of the option pieces/folder, empty is a folder named like the map next to it.
 static func pieces_folder(source_file: String, options: Dictionary) -> String:
 	var folder: String = options.get("pieces/folder", "")
 	return source_file.get_basename() if folder.is_empty() else folder
 
 
-## Groups are named in TrenchBroom, everything else after its classname.
 static func _piece_name(entity: Dictionary, index: int) -> String:
 	if entity.properties.has("_tb_name"):
 		return entity.properties["_tb_name"]
 	return entity.classname if entity.classname == "worldspawn" else "%s_%d" % [entity.classname, index]
 
 
-## Named like the piece, a second piece of the same name gets a number.
+## A second piece of the same name gets a number.
 static func _piece_path(folder: String, piece_name: String, extension: String, taken: PackedStringArray) -> String:
 	var base := folder.path_join(piece_name.validate_filename())
 	var path := "%s.%s" % [base, extension]
@@ -134,7 +129,6 @@ static func _piece_path(folder: String, piece_name: String, extension: String, t
 	return path
 
 
-## A MeshInstance3D with a StaticBody3D of the brushes.
 static func _piece_scene(piece_name: String, mesh: Mesh, shapes: Array[ConvexPolygonShape3D]) -> PackedScene:
 	var root := MeshInstance3D.new()
 	root.name = piece_name.validate_node_name()
@@ -155,7 +149,6 @@ static func _piece_scene(piece_name: String, mesh: Mesh, shapes: Array[ConvexPol
 	return scene
 
 
-## Liquids are left out, a piece is solid.
 static func _shapes(hulls: Array[Dictionary]) -> Array[ConvexPolygonShape3D]:
 	var shapes: Array[ConvexPolygonShape3D] = []
 	for hull in hulls:
@@ -167,8 +160,7 @@ static func _shapes(hulls: Array[Dictionary]) -> Array[ConvexPolygonShape3D]:
 	return shapes
 
 
-## Saving over a piece keeps its uid, so scenes that placed it follow the map. Saving during an import writes no
-## uid by itself: the piece's own goes back in, a new piece gets one.
+## Keeps the uid, so placed pieces follow the map. Saving during an import writes none by itself.
 static func _save_keeping_uid(piece: Resource, path: String) -> Error:
 	var uid := ResourceLoader.get_resource_uid(path) if FileAccess.file_exists(path) else ResourceUID.INVALID_ID
 	if uid == ResourceUID.INVALID_ID:
@@ -183,7 +175,7 @@ static func _save_keeping_uid(piece: Resource, path: String) -> Error:
 	return ResourceSaver.set_uid(path, uid)
 
 
-## Files of pieces gone from the map stay, scenes may still use them.
+## Kept, scenes may still use them.
 static func _warn_about_removed(source_file: String, folder: String, saved: PackedStringArray) -> void:
 	for file in DirAccess.get_files_at(folder):
 		var path := folder.path_join(file)

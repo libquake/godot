@@ -1,7 +1,6 @@
 @tool
 extends EditorContextMenuPlugin
-## FileSystem dock: "Open in TrenchBroom" on maps, "Extract WAD Textures" on wads, and a new map in a folder,
-## opened in TrenchBroom right away.
+## FileSystem dock entries: Open in TrenchBroom, Extract WAD Textures, new Quake Map.
 
 const EXECUTABLE_SETTING := "libquake/trenchbroom/executable"
 
@@ -29,7 +28,7 @@ func _create_map(paths: PackedStringArray) -> void:
 	while FileAccess.file_exists(path):
 		path = paths[0].path_join("new_map_%d.map" % number)
 		number += 1
-	# the game header lets TrenchBroom pick the exported game config, Valve 220 is its default format
+	# the game header picks the exported game config
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	file.store_string('// Game: %s\n// Format: Valve\n// entity 0\n{\n"classname" "worldspawn"\n"mapversion" "220"\n}\n' \
 			% QuakeTrenchBroom.game_name())

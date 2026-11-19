@@ -1,9 +1,8 @@
 @tool
 class_name QuakeMaterials
 extends RefCounted
-## One material per texture of a level. Textures come from image files first, then from the level
-## (wads, bsp). QUAKE looks like Quake with the baked lightmap, GODOT is a StandardMaterial3D that Godot
-## lights, for meshes placed in Godot levels. Sky and liquids look like Quake in both.
+## One material per texture, from image files first, then wads or the bsp. QUAKE uses the baked lightmap,
+## GODOT is a StandardMaterial3D lit by Godot. Sky and liquids look like Quake in both.
 
 enum Style { QUAKE, GODOT }
 
@@ -12,12 +11,12 @@ const SKY_SHADER := preload("shaders/quake_sky.gdshader")
 const LIQUID_SHADER := preload("shaders/quake_liquid.gdshader")
 const MISSING_TEXTURE_PATH := "res://addons/libquake/textures/missing_texture.jpg"
 
-## Brightness of fullbright pixels, above 1 they bloom with the Environment's glow.
+## Above 1 fullbright pixels bloom.
 var fullbright_energy := 1.0
 
-## The lightmap the Quake style surfaces share, null for the Godot style.
+## Null for the Godot style.
 var lightmap: ImageTexture
-## Textures found neither as image files nor in the level, they show the missing texture.
+## Shown with the missing texture.
 var missing_textures := PackedStringArray()
 
 var _level: QuakeLevel
@@ -51,7 +50,7 @@ func get_material(texture_name: String) -> Material:
 	return _materials[texture_name]
 
 
-## The average color of a liquid's texture, it tints the view inside the liquid.
+## Tints the view inside the liquid.
 func liquid_color(texture_name: String) -> Color:
 	if _liquid_colors.has(texture_name):
 		return _liquid_colors[texture_name]
@@ -80,7 +79,7 @@ func _quake_surface(texture_name: String) -> ShaderMaterial:
 	return material
 
 
-## Matte like Quake: no specular, rough, pixels stay sharp, fullbright pixels glow.
+## Matte, sharp pixels, glowing fullbrights.
 func _godot_surface(texture_name: String) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.albedo_texture = _albedo(texture_name, true)
@@ -141,6 +140,6 @@ static func _image_texture(image: Image, mipmaps := false) -> Texture2D:
 	return ImageTexture.create_from_image(image)
 
 
-## A grey grid, so faces without their texture still show how they are mapped.
+## A grey grid that still shows the mapping.
 static func missing_texture() -> Texture2D:
 	return load(MISSING_TEXTURE_PATH)

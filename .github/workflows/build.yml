@@ -1,6 +1,4 @@
-# Builds the extension for Windows, macOS and Linux against a libquake release, runs the tests and commits the
-# binaries to addons/libquake/bin. Runs on a libquake release (repository_dispatch libquake-release), on a push
-# that changes the extension, and by hand.
+# Builds the extension against a libquake release, tests it and commits the binaries to addons/libquake/bin.
 name: build
 
 on:
@@ -47,7 +45,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04 # the oldest glibc still built on keeps the library loadable on older distributions
+          - os: ubuntu-22.04 # old glibc, loads on older distributions
             library: libquake.so
           - os: macos-latest
             library: libquake.dylib

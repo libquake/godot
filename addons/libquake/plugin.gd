@@ -17,7 +17,7 @@ var _bake_button: Button
 var _lightmap: QuakeLightmap
 var _auto_bake_timer: Timer
 var _browser: Control
-## The browser's EditorDock, or the browser itself in the bottom panel of Godot 4.5.
+## The browser itself in Godot 4.5's bottom panel.
 var _browser_dock: Control
 
 
@@ -25,7 +25,7 @@ func _enter_tree() -> void:
 	QuakeImportSettings.register()
 	QuakeMapWatcher.register_setting()
 	preload("quake_file_menu.gd").register_setting()
-	# one each: Godot takes a context menu plugin only once, the second slot would stay empty
+	# one each: Godot takes a context menu plugin only once
 	for slot in [EditorContextMenuPlugin.CONTEXT_SLOT_FILESYSTEM, EditorContextMenuPlugin.CONTEXT_SLOT_FILESYSTEM_CREATE]:
 		var file_menu: EditorContextMenuPlugin = preload("quake_file_menu.gd").new()
 		add_context_menu_plugin(slot, file_menu)
@@ -120,22 +120,21 @@ func _bake_lightmap(lightmap: QuakeLightmap) -> void:
 	if path.is_empty():
 		return
 	EditorInterface.get_resource_filesystem().update_file(path)
-	# marking the scene changes its history, that must not start the next auto bake; an edit made while
-	# baking already started it and keeps it
+	# marking the scene unsaved must not start the next auto bake, an edit during the bake may
 	var edited_while_baking := not _auto_bake_timer.is_stopped()
 	EditorInterface.mark_scene_as_unsaved()
 	if not edited_while_baking:
 		_auto_bake_timer.stop()
 
 
-## Every edit restarts the timer, so moving things around bakes once they have stayed put for a moment.
+## Every edit restarts the timer, so it bakes once things stay put.
 func _on_scene_changed() -> void:
 	var lightmap := _auto_bake_lightmap()
 	if lightmap:
 		_auto_bake_timer.start(lightmap.auto_bake_delay)
 
 
-## A map placed in the open scene changed: its light has to be baked again.
+## A map placed in the open scene changed, its light needs a new bake.
 func _on_resources_reimported(resources: PackedStringArray) -> void:
 	if resources.has(_browser.path):
 		_show_in_browser(_browser.path)
@@ -158,7 +157,7 @@ func _auto_bake() -> void:
 		_bake_lightmap(lightmap)
 
 
-## The QuakeLightmap of the open scene with auto_bake on, only in saved scenes: baking needs the path.
+## Only in saved scenes, baking needs the path.
 func _auto_bake_lightmap() -> QuakeLightmap:
 	var root := EditorInterface.get_edited_scene_root()
 	if not root or root.scene_file_path.is_empty():
@@ -169,7 +168,7 @@ func _auto_bake_lightmap() -> QuakeLightmap:
 	return null
 
 
-## Any wad on the disk, e.g. of a Quake install; the images go to the first texture directory.
+## Any wad on disk, e.g. of a Quake install.
 func _choose_wad() -> void:
 	var dialog := EditorFileDialog.new()
 	dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
@@ -188,8 +187,7 @@ func _extract_wad(path: String) -> void:
 	QuakeWadExtractor.extract_to_project(path)
 
 
-## The Quake panel at the bottom: an EditorDock from Godot 4.6 on, before it the bottom panel. Selecting a map of
-## pieces or a wad in the FileSystem dock shows it there.
+## EditorDock from Godot 4.6, the bottom panel before.
 func _add_browser() -> void:
 	_browser = preload("quake_browser.gd").new()
 	_browser.extract_requested.connect(_extract_wad)
@@ -228,7 +226,7 @@ func _on_files_selected() -> void:
 			make_bottom_panel_item_visible(_browser)
 
 
-## Levels import as scenes, only pieces and wads are a Resource: no level is loaded for a click.
+## Checks the type first, so a click never loads a level.
 func _show_in_browser(path: String) -> bool:
 	if not path.get_extension().to_lower() in ["map", "wad"]:
 		return false
@@ -259,8 +257,7 @@ func _export_game_config() -> void:
 	QuakeTrenchBroom.export_game_config(_project_entity_classes())
 
 
-## Keeps TrenchBroom's entity definitions in step: saving the project's entity classes, a script one of them
-## uses or a ground fog style (the choices of the style key) exports the game config again.
+## Saving the entity classes, a script they use or a ground fog style exports the game config again.
 func _on_resource_saved(resource: Resource) -> void:
 	var classes := _project_entity_classes()
 	if resource is QuakeGroundFogStyle:

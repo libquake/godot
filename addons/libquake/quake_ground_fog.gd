@@ -1,37 +1,33 @@
 @tool
 class_name QuakeGroundFog
 extends Node3D
-## Fog lying on the floor of a box: its top rolls in hills, it fades out toward the box's sides and stays where
-## it was put. What stands in the box pokes out of the fog. A func_groundfog becomes one the size of its brush;
-## placed in a scene, size sets the box. The box is centered on the node and turns with it. Its look is a
-## QuakeGroundFogStyle.
+## Fog on the floor of a box centered on the node, with a rolling top and faded sides. A func_groundfog sets
+## the box from its brush. The look is a QuakeGroundFogStyle.
 
 const CLASSNAME := "func_groundfog"
 const SHADER := preload("shaders/quake_ground_fog.gdshader")
-## Drop to Floor sinks the box this far into the floor, so no gap shows under the fog.
+## How far Drop to Floor sinks the box, so no gap shows.
 const FLOOR_SINK := 0.02
-## A box floor this far above the floor under it floats.
+## Above this gap the box counts as floating.
 const FLOAT_TOLERANCE := 0.1
 const FLOOR_SEARCH := 100.0
 
-## The box in meters, a bit taller than the fog with its hills. A func_groundfog takes its brush's.
+## A bit taller than the fog with its hills.
 @export var size := Vector3(8.0, 2.0, 8.0):
 	set(value):
 		size = value.max(Vector3.ONE * 0.1)
 		_update_box()
 		update_gizmos()
 		update_configuration_warnings()
-## The look, shared with every fog using the same style. Empty looks like the style named default.
+## Empty uses the style named default.
 @export var style: QuakeGroundFogStyle:
 	set(value):
 		style = value
 		_use_style()
-## Puts the box's floor on the lowest floor under it.
 @export_tool_button("Drop to Floor", "ArrowDown") var drop_to_floor := _drop_to_floor
 
 var _mesh: MeshInstance3D
 var _material: ShaderMaterial
-## The style the shader has: style, or the default one.
 var _active_style: QuakeGroundFogStyle
 
 
@@ -45,7 +41,7 @@ func _ready() -> void:
 	_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# a QuakeLightmap above leaves it out
 	_mesh.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-	# internal and without an owner: never saved, not in the scene tree dock
+	# internal and unowned: never saved, not in the scene dock
 	add_child(_mesh, false, Node.INTERNAL_MODE_BACK)
 	_use_style()
 	_update_box()
@@ -64,7 +60,7 @@ func _get_configuration_warnings() -> PackedStringArray:
 	if active and size.y < active.top():
 		warnings.append("The box is %.2f m high, the fog with its hills reaches %.2f m: its top is cut flat."
 				% [size.y, active.top()])
-	# it rests when any of the rays finds floor at its own; a lower one may be a neighbouring area
+	# resting if any ray finds floor at its own height, a lower hit may be a neighbouring area
 	var floors := _floors_below()
 	if not floors.is_empty():
 		var gap: float = _box_floor() - Array(floors).max()
@@ -74,21 +70,20 @@ func _get_configuration_warnings() -> PackedStringArray:
 	return warnings
 
 
-## The style the fog looks like: its own or the default one.
 func style_in_use() -> QuakeGroundFogStyle:
 	if _active_style:
 		return _active_style
 	return style if style else QuakeGroundFogStyle.find(QuakeGroundFogStyle.DEFAULT)
 
 
-## The height of the floor under the box's middle, where Drop to Floor puts it; -INF without one.
+## -INF without one.
 func floor_below() -> float:
 	if not is_inside_tree():
 		return -INF
 	return _floor_at(Vector2.ZERO)
 
 
-## The floors under the box's middle and halfway to its corners, those the rays found.
+## Under the box's middle and halfway to its corners.
 func _floors_below() -> PackedFloat32Array:
 	var floors := PackedFloat32Array()
 	if not is_inside_tree():
@@ -100,7 +95,6 @@ func _floors_below() -> PackedFloat32Array:
 	return floors
 
 
-## A ray from the box's middle height down to collision, at offset times the box's size from its middle.
 func _floor_at(offset: Vector2) -> float:
 	var from := global_transform * Vector3(offset.x * size.x, 0.0, offset.y * size.z)
 	var to := from + Vector3.DOWN * (size.y * 0.5 + FLOOR_SEARCH)
@@ -108,13 +102,12 @@ func _floor_at(offset: Vector2) -> float:
 	return hit.position.y if not hit.is_empty() else -INF
 
 
-## Makes the box the brush's bounds, given in the node's space: the node moves to their center.
+## Bounds in the node's space, the node moves to their center.
 func fit(bounds: AABB) -> void:
 	position += bounds.get_center()
 	size = bounds.size
 
 
-## Follows the style's changes, so editing it shows on every fog using it at once.
 func _use_style() -> void:
 	if not _material:
 		return
@@ -130,7 +123,6 @@ func _use_style() -> void:
 
 func _send_style() -> void:
 	for param in QuakeGroundFogStyle.PARAMS:
-		# null puts the shader's own default back
 		_material.set_shader_parameter(param, _active_style.get(param) if _active_style else null)
 	update_gizmos()
 	update_configuration_warnings()
@@ -151,7 +143,7 @@ func _drop_to_floor() -> void:
 	var target := global_position + Vector3.UP * (floor_y - FLOOR_SINK - _box_floor())
 	var parent := get_parent_node_3d()
 	var new_position := parent.global_transform.affine_inverse() * target if parent else target
-	# a script of the game cannot name the editor's classes
+	# game scripts cannot name editor classes
 	if not Engine.is_editor_hint():
 		position = new_position
 		return

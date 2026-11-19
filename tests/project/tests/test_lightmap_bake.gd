@@ -32,7 +32,7 @@ func test_bake() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVED))
 
 
-## A level put together while the game runs, like a generator does: no scene file, two modules side by side.
+## Built while the game runs: no scene file, two modules side by side.
 func test_bake_in_the_game() -> void:
 	var level := Node3D.new()
 	add_child(level)

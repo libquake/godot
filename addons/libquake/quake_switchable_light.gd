@@ -1,7 +1,6 @@
 class_name QuakeSwitchableLight
 extends Marker3D
-## A light entity with a targetname: firing it switches its light like Quake's light_use. It starts off
-## with spawnflag 1. The import gives it the style the bake gave its targetname, 32 and up.
+## A light with a targetname, firing it switches it like Quake's light_use. Spawnflag 1 starts it off.
 
 const START_OFF := 1
 
@@ -20,6 +19,6 @@ func _quake_triggered(_activator: Node) -> void:
 	_switch()
 
 
-## Style numbers belong to a map; maps baked together by one QuakeLightmap may share them.
+## Style numbers belong to a map, maps baked together may share them.
 func _switch() -> void:
 	get_tree().call_group(QuakeLightStyles.GROUP, &"set_style", style, "m" if _on else "a")

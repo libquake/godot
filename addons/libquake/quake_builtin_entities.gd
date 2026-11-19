@@ -1,10 +1,9 @@
 @tool
 class_name QuakeBuiltinEntities
 extends RefCounted
-## Entity classes libquake understands on its own, for the FGD: the worldspawn and light keys the bake
-## reads, and the brush entities the import knows.
+## What libquake reads on its own, for the FGD: worldspawn and light keys, known brush entities.
 
-## Climbable brush volume, an Area3D in this group for a character controller to climb.
+## An Area3D in this group, for a character controller to climb.
 const LADDER := "func_ladder"
 
 
@@ -52,7 +51,7 @@ static func classes() -> Array[QuakeEntityClass]:
 	]
 
 
-## The style key chooses among the styles there are when the FGD is exported.
+## The style choices are filled in when the FGD is exported.
 static func _ground_fog() -> QuakeEntityClass:
 	return _entity(QuakeGroundFog.CLASSNAME, QuakeEntityClass.Type.BRUSH,
 			"Ground fog lying on the floor of the brush's bounds, the brush is not drawn", {

@@ -1,8 +1,7 @@
 @tool
 class_name QuakeMapGizmo
 extends EditorNode3DGizmoPlugin
-## Draws the entity picked in the inspector of a QuakeMap: a box around it, lines to the entities it fires
-## (orange) and from the entities that fire it (cyan), like TrenchBroom shows links.
+## The entity picked in a QuakeMap's inspector: a box, links to its targets (orange) and from its sources (cyan).
 
 const POINT_SIZE := 0.5
 ## Corners of an AABB as get_endpoint() numbers them, paired along its twelve edges.
@@ -55,7 +54,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	gizmo.add_lines(sources, get_material("sources", gizmo))
 
 
-## Where the lines meet an entity: the middle of its mesh or, for triggers, of its collision.
+## The middle of its mesh, or of its collision for triggers.
 static func _center(map: QuakeMap, entity: Node) -> Vector3:
 	return map.to_local((entity as Node3D).global_transform * _bounds(entity).get_center())
 
@@ -69,8 +68,7 @@ static func _box(map: QuakeMap, entity: Node3D) -> PackedVector3Array:
 	return lines
 
 
-## In the entity's space: its mesh, else its convex collision (triggers are not drawn), else a small cube.
-## Ground fog has neither, its box is the size it was given.
+## In the entity's space: its mesh, else its collision, else a small cube. Ground fog uses its size.
 static func _bounds(entity: Node) -> AABB:
 	if entity is QuakeGroundFog:
 		return AABB(entity.size * -0.5, entity.size)

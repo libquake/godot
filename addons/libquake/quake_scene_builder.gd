@@ -1,25 +1,20 @@
 @tool
 class_name QuakeSceneBuilder
 extends RefCounted
-## Builds a scene from a loaded map: a QuakeMap root with one node per entity, meshes with Quake
-## materials, convex collision per brush, an Area3D per liquid brush and the light grid for models.
-##
-## Every entity node carries the libquake entity as meta "quake_entity" (classname, properties,
-## origin, angles, move_dir) and is in a group named after its classname.
+## Builds a QuakeMap scene: a node per entity, collision per brush, Area3Ds for liquids, the light grid. Entity
+## nodes carry the meta "quake_entity" and are in a group named after their classname.
 
 const ENTITY_META := &"quake_entity"
 
 const TRIGGER_COLOR := Color(1.0, 0.55, 0.1, 0.35)
 const LIQUID_COLOR := Color(0.2, 0.5, 1.0, 0.3)
-# not 0: a scene does not store a debug_color of (0, 0, 0, 0), Godot's default, and loads the project's color
+# not 0: a scene does not store the default debug_color and loads the project's
 const HIDDEN := Color(0.0, 0.0, 0.0, 1.0 / 255.0)
-## FitzQuake's gl_zfix, in map units per axis: brush entities are drawn this far off, so the world always
-## wins where a door rests flush with the floor instead of fighting with it.
+## FitzQuake's gl_zfix in map units: brush entities are drawn this far off against z-fighting.
 const BRUSH_ENTITY_OFFSET := 1.0 / 32.0
 
 var entity_classes: QuakeEntityClasses
 var light_grid_cell_size := 1.0
-## The editor draws collision shapes in their debug_color, brushes would cover the whole map.
 var show_hulls := false
 
 var _level: QuakeLevel
@@ -64,8 +59,7 @@ func build(loader: QuakeMapLoader, options: Dictionary, root_name: String) -> Qu
 	return root
 
 
-## The lines of current that previous did not have, counts left out: one more monster of a class without an
-## entity class is nothing new, a class that was not there before is.
+## The lines of current not in previous, ignoring counts.
 static func new_warnings(previous: PackedStringArray, current: PackedStringArray) -> PackedStringArray:
 	var counts := RegEx.create_from_string(" \\(\\d+\\)")
 	var known := {}
@@ -80,7 +74,7 @@ static func new_warnings(previous: PackedStringArray, current: PackedStringArray
 	return added
 
 
-## What the import could not resolve, one line per kind of problem; empty when all went well.
+## One line per kind of problem.
 func report() -> PackedStringArray:
 	var lines := PackedStringArray()
 	if not _materials.missing_textures.is_empty():
@@ -120,7 +114,7 @@ func _build_entity(entity: Dictionary, index: int) -> Node3D:
 			node.fit(_brush_bounds(geometry))
 			_pick_fog_style(node)
 		else:
-			# Quake's InitTrigger hides triggers, whatever texture their brushes have
+			# Quake's InitTrigger hides triggers whatever their texture
 			_add_geometry(node, geometry, not _is_volume(classname), is_world(classname))
 	else:
 		node.position = entity.origin
@@ -150,17 +144,16 @@ func _create_node(entity_class: QuakeEntityClass, entity: Dictionary) -> Node3D:
 	return StaticBody3D.new()
 
 
-## Triggers and ladders: an invisible Area3D.
 static func _is_volume(classname: String) -> bool:
 	return classname.begins_with("trigger_") or classname == QuakeBuiltinEntities.LADDER
 
 
-## Brushes of these belong to the world, as in the light tools: they block light and are not offset.
+## Part of the world as in the light tools: they block light and are not offset.
 static func is_world(classname: String) -> bool:
 	return classname in ["worldspawn", "func_group"] or classname.begins_with("func_detail")
 
 
-## The style key names the fog's style. Without one the fog follows the default style, also one added later.
+## Without a style key the fog follows the default style.
 func _pick_fog_style(fog: QuakeGroundFog) -> void:
 	var style_name := QuakeEntity.get_string(fog, "style")
 	if not style_name.is_empty() and style_name != QuakeGroundFogStyle.DEFAULT:
@@ -173,7 +166,7 @@ func _pick_fog_style(fog: QuakeGroundFog) -> void:
 		_low_fogs.append("%s (%.2f m of %.2f m)" % [fog.name, fog.size.y, looks.top()])
 
 
-## The bounds of an entity's brushes around its pivot, from their hulls: tool textures leave no faces.
+## From the hulls, tool textures leave no faces.
 func _brush_bounds(geometry: int) -> AABB:
 	var points := PackedVector3Array()
 	for hull: Dictionary in _level.get_geometry_hulls(geometry):
@@ -225,7 +218,7 @@ static func _tinted(shape: CollisionShape3D, color: Color) -> CollisionShape3D:
 	return shape
 
 
-## A bsp keeps no brushes, so its faces collide, as in the Quake engine. Liquids stay walkable.
+## A bsp keeps no brushes, so its faces collide. Liquids stay walkable.
 static func _face_collision(mesh: ArrayMesh) -> CollisionShape3D:
 	var faces := PackedVector3Array()
 	for surface in mesh.get_surface_count():
@@ -248,7 +241,6 @@ func _create_liquid(texture_name: String, shape: CollisionShape3D, index: int) -
 	var area := Area3D.new()
 	area.name = "Liquid_%d" % index
 	area.monitoring = false
-	# teleporters are no liquid to swim in or look through
 	if kind != "teleport":
 		area.add_to_group(QuakeLiquids.GROUP, true)
 	area.set_meta(QuakeLiquids.KIND_META, kind)
@@ -257,7 +249,6 @@ func _create_liquid(texture_name: String, shape: CollisionShape3D, index: int) -
 	return area
 
 
-## Targets no entity of the map answers to, like a teleporter whose destination is missing.
 func _report_targets(entities: Array[Dictionary]) -> void:
 	var names := {}
 	for entity in entities:
@@ -268,8 +259,7 @@ func _report_targets(entities: Array[Dictionary]) -> void:
 			_dangling_targets.append("%s targets \"%s\", no entity has that targetname" % [entity.classname, target])
 
 
-## The styles the bake gives switchable lights, by targetname: libquake's QuakeLightsFromEntities numbers the
-## targetnames of light entities without a style from 32 up, in the order they first appear.
+## By targetname, numbered from 32 in order of appearance like libquake's QuakeLightsFromEntities.
 static func _switchable_light_styles(entities: Array[Dictionary]) -> Dictionary:
 	var styles := {}
 	for entity in entities:
@@ -281,7 +271,7 @@ static func _switchable_light_styles(entities: Array[Dictionary]) -> Dictionary:
 	return styles
 
 
-## Quake angles are pitch (positive looks down), yaw and roll. Yaw 0 looks along Quake's +x.
+## Pitch (positive looks down), yaw, roll. Yaw 0 looks along Quake's +x.
 static func _rotation_from_angles(angles: Vector3) -> Vector3:
 	return Vector3(-angles.x, angles.y - 90.0, angles.z)
 

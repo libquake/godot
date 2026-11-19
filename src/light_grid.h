@@ -7,8 +7,7 @@
 
 namespace libquake_godot {
 
-  /// Light sampled on a regular grid the way Quake lights models: trace down from each point and read the
-  /// lightmap where the trace hits. Engine agnostic, could move into libquake.
+  /// Light on a grid the way Quake lights models: trace down from each point, read the lightmap where it hits.
   struct LightGrid {
     quakelib::Vec3 origin{0, 0, 0}; ///< the first point, in the coordinates of the floors
     float cellSize = 0;

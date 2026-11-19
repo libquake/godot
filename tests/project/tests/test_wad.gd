@@ -41,8 +41,7 @@ func test_wad_imports_as_its_textures() -> void:
 		check_equal(preview.get_pixel(3, 5), first.get_pixel(3, 5), "lossless")
 
 
-## A wad anywhere in the project is found: by the file name in the key wad, whatever path and case the mapper's
-## machine had, and without the key by the texture's name.
+## By the key's file name, whatever its path and case, and without the key by texture name.
 func test_maps_find_the_project_wads() -> void:
 	var wad_path := ProjectSettings.globalize_path("res://").path_join(WAD).simplify_path()
 	var folder := "res://wad_lookup_test/textures"

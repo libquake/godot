@@ -2,7 +2,7 @@
 @icon("icons/quake_map.svg")
 class_name QuakeMap
 extends Node3D
-## The root of an imported Quake map. Each entity is a child in a group named after its classname.
+## Root of an imported map. Entities are children in a group named after their classname.
 
 
 const NOT_IN_EASY := 256
@@ -10,19 +10,19 @@ const NOT_IN_NORMAL := 512
 const NOT_IN_HARD := 1024
 const NOT_IN_DEATHMATCH := 2048
 
-## Quake units per meter the map was imported with, its option geometry/units_per_meter.
+## geometry/units_per_meter of its import.
 @export var units_per_meter := 32.0
-## What its import could not resolve, as in the Output; the inspector shows it with the entities.
+## What its import could not resolve.
 @export_storage var import_warnings := PackedStringArray()
 
 
-## Removes the entities the map does not have at a skill (0 easy, 1 normal, 2 hard, 3 nightmare) or in
-## deathmatch, as Quake does when it spawns them. Call it before the level starts.
+## Removes entities not spawned at this skill (0 easy to 3 nightmare) or in deathmatch, as Quake does. Call it
+## before the level starts.
 func apply_skill(skill: int, deathmatch := false) -> void:
 	var excluded: int = NOT_IN_DEATHMATCH if deathmatch else [NOT_IN_EASY, NOT_IN_NORMAL, NOT_IN_HARD][clampi(skill, 0, 2)]
 	for node in get_children():
 		if node.has_meta(QuakeSceneBuilder.ENTITY_META) and QuakeEntity.has_spawnflag(node, excluded):
-			# out of the tree right away, so find_targets() no longer sees it
+			# right away, so find_targets() no longer sees it
 			remove_child(node)
 			node.queue_free()
 
@@ -35,7 +35,7 @@ static func of(node: Node) -> QuakeMap:
 	return current
 
 
-## Quake connects entities by name: an entity's "target" is the "targetname" of the entities it acts on.
+## The entities whose "targetname" is targetname.
 func find_targets(targetname: String) -> Array[Node]:
 	var found: Array[Node] = []
 	if targetname.is_empty():

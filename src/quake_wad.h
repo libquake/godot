@@ -9,7 +9,7 @@
 
 namespace libquake_godot {
 
-  /// The textures of a .wad file as images, e.g. to turn a wad into the image files TrenchBroom reads.
+  /// The textures of a .wad file as images.
   class QuakeWad : public godot::RefCounted {
     GDCLASS(QuakeWad, godot::RefCounted)
 

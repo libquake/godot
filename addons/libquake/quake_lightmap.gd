@@ -1,27 +1,21 @@
 @tool
 class_name QuakeLightmap
 extends Node3D
-## Bakes light the way the Quake light tools do for the static meshes next to and below it, like
-## LightmapGI: brushes of imported maps, pieces and models alike. Select it and press
-## "Bake Quake Light" in the 3D editor's toolbar.
-##
-## Meshes take part with gi_mode Static and UV2, CSG shapes get UV2 when they are baked. Meshes below a
-## RigidBody3D or CharacterBody3D move and are left out. Surfaces with a
-## Quake world material or a StandardMaterial3D get the lightmap, every other surface only casts shadows.
-## The result is saved next to the scene and applied when the scene loads, without changing the meshes or
-## their scenes.
+## Bakes Quake-style light for the static meshes below its parent, like LightmapGI. Meshes need gi_mode Static
+## and UV2, CSG shapes get UV2. Surfaces with a Quake world material or a StandardMaterial3D get the lightmap,
+## others only cast shadows. The result is saved next to the scene and applied on load.
 
 const RECT_PARAMETER := &"lightmap_rect"
-## On a baked material: the material it was made from.
+## On a baked material: its source.
 const SOURCE_META := &"quake_lightmap_source"
 
-## Clear it to remove the bake from the scene.
+## Clear to remove the bake.
 @export var data: QuakeLightmapData:
 	set(value):
 		data = value
 		if is_node_ready():
 			_apply()
-## Bakes again in the editor once the scene has not changed for auto_bake_delay seconds.
+## Bakes again in the editor once the scene is unchanged for auto_bake_delay.
 @export var auto_bake := false
 @export_range(0.5, 30.0, 0.5, "suffix:s") var auto_bake_delay := 3.0
 
@@ -30,24 +24,23 @@ const SOURCE_META := &"quake_lightmap_source"
 @export var godot_lights := true
 ## The light entities of imported maps.
 @export var quake_lights := true
-## The worldspawn of imported maps: sun, _minlight, _anglescale and _range.
+## Sun, _minlight, _anglescale and _range.
 @export var worldspawn := true
-## Quake light value of a Godot light with energy 1, 300 is the default of a Quake light entity.
+## Quake light value of energy 1.
 @export var light_intensity := 300.0
-## Added to the light everywhere, so shadows are not pitch black: 1 is the texture's normal brightness.
+## Added everywhere, 1 is normal brightness.
 @export var ambient_light := Color.BLACK
-## The least light every surface gets, like _minlight: 1 is the texture's normal brightness.
+## Like _minlight, 1 is normal brightness.
 @export_range(0.0, 2.0, 0.01) var minimum_light := 0.0
 
 @export_group("Lightmap")
-## Map units per lightmap texel on the brushes of imported maps, 16 like Quake.
+## On the brushes of imported maps.
 @export var luxel_size := 16.0
-## Map units per lightmap texel on every other mesh, finer than brushes: a statue lit at 16 units per texel
-## would only get a handful of them. gi_lightmap_texel_scale of a mesh scales it further.
+## On other meshes, scaled by their gi_lightmap_texel_scale.
 @export var mesh_luxel_size := 2.0
-## For a scope without maps; with maps the first one's scale counts, like _anglescale and _range.
+## Without maps; otherwise the first map's scale counts.
 @export var units_per_meter := 32.0
-## Meters between the points that light models, 0 leaves the grid out.
+## Meters between the points that light models, 0 is none.
 @export var light_grid_cell_size := 1.0
 
 var _applied: Array[Dictionary] = []
@@ -64,7 +57,7 @@ func _ready() -> void:
 	_apply()
 
 
-## Deferred: while the tree adds children or sends notifications, add_child() is blocked.
+## Deferred, add_child() is blocked during tree notifications.
 func _enter_tree() -> void:
 	if is_node_ready():
 		_apply.call_deferred()
@@ -88,21 +81,18 @@ func is_baking() -> bool:
 	return _bake_thread != null
 
 
-## Bakes and saves the result next to the scene, returns the saved path or an empty string. The scene is
-## read first and the result applied at the end, the bake itself runs in a thread: await it.
+## Saves next to the scene, returns the path or "". Runs in a thread: await it.
 func bake() -> String:
 	var scene_path := owner.scene_file_path if owner else scene_file_path
 	if scene_path.is_empty():
 		push_error("QuakeLightmap: save the scene before baking.")
 		return ""
-	# never the path of the assigned data: a copied scene still refers to the original's file
+	# not data's path: a copied scene still refers to the original's file
 	var path := scene_path.get_basename() + ".lightmap.res"
 	return path if await bake_to(path) else ""
 
 
-## Bakes and applies the result, in the game too: a level put together while loading, a map a player made.
-## A path saves it there as well, in an exported game under user:// (res:// is read only); without one it is
-## only kept in data. Returns whether it worked; await it, the bake runs in a thread.
+## Also in the game. A path saves it there, user:// in an exported game. Returns whether it worked, await it.
 func bake_to(path := "") -> bool:
 	if is_baking():
 		return false
@@ -149,7 +139,7 @@ func bake_to(path := "") -> bool:
 	_bake_thread.start(baker.bake)
 	while _bake_thread and _bake_thread.is_alive():
 		await tree.process_frame
-	# null when the node left the tree meanwhile, the bake is dropped then
+	# null when the node left the tree meanwhile
 	if not _bake_thread:
 		return false
 	var error: Error = _bake_thread.wait_to_finish()
@@ -168,7 +158,7 @@ func bake_to(path := "") -> bool:
 		result.grid_rgb = grid.rgb
 
 	if not path.is_empty():
-		# a new resource would get a new uid, the scene refers to the old one
+		# keeps the uid the scene refers to
 		var uid := ResourceLoader.get_resource_uid(path) if ResourceLoader.exists(path) else ResourceUID.INVALID_ID
 		error = ResourceSaver.save(result, path)
 		if error != OK:
@@ -194,7 +184,7 @@ func _apply() -> void:
 			_apply_csg(node, data.csg_meshes[data.meshes[index]], data.uv_transforms[index])
 		elif node is MeshInstance3D and node.mesh:
 			_apply_mesh(node, data.uv_transforms[index])
-	# on the rendering server only: the node keeps its cull mask, a copy of it would not inherit 0
+	# on the rendering server only, the node keeps its cull mask
 	for path in data.lights:
 		var light := get_node_or_null(path) as Light3D
 		if light:
@@ -207,7 +197,7 @@ func _apply() -> void:
 
 func _revert() -> void:
 	for applied in _applied:
-		# a reimported map frees its nodes, and a freed node fails a typed assignment
+		# a reimported map frees its nodes, which fails a typed assignment
 		var alive := is_instance_valid(applied.node)
 		if applied.has("csg"):
 			if is_instance_valid(applied.csg):
@@ -266,8 +256,7 @@ func _apply_mesh(mesh_instance: MeshInstance3D, uv_transform: Vector4) -> void:
 	_applied.append(applied)
 
 
-## A CSG shape draws its own mesh without UV2, so the baked copy with UV2 is drawn in its place. Only the
-## shape's drawing is hidden, its children and collision stay.
+## CSG meshes lack UV2, so the baked copy is drawn instead. Only the shape's own drawing is hidden.
 func _apply_csg(csg: CSGShape3D, mesh: Mesh, uv_transform: Vector4) -> void:
 	var mesh_instance := MeshInstance3D.new()
 	mesh_instance.mesh = mesh
@@ -297,12 +286,11 @@ func _replace_grids() -> void:
 	_grid.add_to_group(QuakeLightGrid.GROUP)
 
 
-## The maps' own light styles would animate a lightmap that is no longer drawn, the bake's take over. Only
-## in the game, the editor shows the lightmap at rest.
+## The bake's light styles replace the maps' own, in the game only.
 func _replace_light_styles() -> void:
 	if Engine.is_editor_hint():
 		return
-	# process_mode rather than set_process(): the maps may not be ready yet, that would switch it back on
+	# not set_process(): a map's _ready() would switch it back on
 	for styles: QuakeLightStyles in get_tree().get_nodes_in_group(QuakeLightStyles.GROUP):
 		if _scope().is_ancestor_of(styles):
 			styles.process_mode = Node.PROCESS_MODE_DISABLED
@@ -313,7 +301,7 @@ func _replace_light_styles() -> void:
 	add_child(_styles, false, INTERNAL_MODE_BACK)
 
 
-## The material with the baked lightmap, null for materials that do not take one.
+## Null for materials that take no lightmap.
 func _baked_material(source: Material) -> Material:
 	if not source:
 		return null
@@ -331,13 +319,12 @@ func _baked_material(source: Material) -> Material:
 	return baked
 
 
-## The material a baked one was made from. Duplicating a node in the editor copies the baked material
-## along with it, as a real override of the copy.
+## Duplicated nodes copy the baked material as a real override.
 static func _source(material: Material) -> Material:
 	return material.get_meta(SOURCE_META) if material and material.has_meta(SOURCE_META) else material
 
 
-## The Quake world shader with the textures, colors and tiling of a StandardMaterial3D, the rest is dropped.
+## Takes textures, colors and tiling of a StandardMaterial3D.
 static func _world_material(source: BaseMaterial3D) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
 	material.shader = QuakeMaterials.WORLD_SHADER
@@ -351,8 +338,7 @@ static func _world_material(source: BaseMaterial3D) -> ShaderMaterial:
 	return material
 
 
-## Adds the lit surfaces of a source (see _static_geometry) to group, true if it had any. Every other
-## surface but liquids only blocks light.
+## True if the source had lit surfaces. Other surfaces but liquids only block light.
 func _add_mesh(baker: QuakeLightBaker, source: Dictionary, group: Dictionary) -> bool:
 	var node: GeometryInstance3D = source.node
 	var mesh: Mesh = source.mesh
@@ -384,8 +370,7 @@ func _add_mesh(baker: QuakeLightBaker, source: Dictionary, group: Dictionary) ->
 	return lit
 
 
-## The meshes of an imported map share its lightmap layout and are baked as one, so the layout stays
-## compact. Any other mesh gets its own place in the atlas.
+## A map's meshes share its layout and bake as one, other meshes get their own place.
 func _atlas_key(source: Dictionary) -> Variant:
 	var map := QuakeMap.of(source.node)
 	if map:
@@ -417,12 +402,11 @@ static func _takes_lightmap(material: Material) -> bool:
 	return material is BaseMaterial3D or (material is ShaderMaterial and material.shader == QuakeMaterials.WORLD_SHADER)
 
 
-## Like LightmapGI: the parent and everything below it.
 func _scope() -> Node:
 	return get_parent() if get_parent() else self
 
 
-## What gets baked: node, mesh and the material of every surface. CSG shapes give their mesh with UV2 added.
+## Node, mesh and surface materials of everything baked.
 func _static_geometry() -> Array[Dictionary]:
 	var sources: Array[Dictionary] = []
 	for node in _scope().find_children("*", "GeometryInstance3D", true, false):
@@ -447,8 +431,7 @@ func _static_geometry() -> Array[Dictionary]:
 	return sources
 
 
-## Like libquake's import bake and ericw-tools: of a map's brush entities only the world and its groups
-## block light, others only with "_shadow" "1". A door baked where it stands would leave its shadow there.
+## As in ericw-tools, only the world and its groups block light, other brush entities with "_shadow" "1".
 func _entity_casts_shadow(node: Node) -> bool:
 	var parent := node
 	while parent and parent != _scope():
@@ -459,8 +442,7 @@ func _entity_casts_shadow(node: Node) -> bool:
 	return true
 
 
-## Below a body that moves, gi_mode Static is only Godot's default. Doors (AnimatableBody3D) stay in: like
-## in Quake they are lit where they stand.
+## Static is only Godot's default below moving bodies. Doors (AnimatableBody3D) stay in, as in Quake.
 func _moves(node: Node) -> bool:
 	var parent := node.get_parent()
 	while parent and parent != _scope():

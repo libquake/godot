@@ -1,8 +1,7 @@
 @tool
 extends EditorImportPlugin
-## Imports a .wad as QuakeWadTextures, so the FileSystem dock shows it and the Quake panel its textures.
+## Imports a .wad as QuakeWadTextures, so the editor lists it and shows its textures.
 
-## Larger textures are scaled down for the preview, Quake's are 128 pixels or less mostly.
 const PREVIEW_SIZE := 128
 
 
@@ -58,7 +57,7 @@ func _import(source_file: String, save_path: String, _options: Dictionary,
 	return ResourceSaver.save(textures, "%s.%s" % [save_path, _get_save_extension()])
 
 
-## The textures of the wad at path, null if it does not load.
+## Null if the wad does not load.
 static func read(path: String) -> QuakeWadTextures:
 	var wad := QuakeWad.new()
 	if wad.load(ProjectSettings.globalize_path(path)) != OK:
@@ -74,7 +73,7 @@ static func read(path: String) -> QuakeWadTextures:
 	return textures
 
 
-## Pixels stay sharp, and lossless WebP keeps the file small.
+## Nearest scaling, lossless WebP.
 static func _preview(image: Image) -> Texture2D:
 	var largest := maxi(image.get_width(), image.get_height())
 	if largest > PREVIEW_SIZE:

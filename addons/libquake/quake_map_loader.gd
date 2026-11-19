@@ -1,7 +1,7 @@
 @tool
 class_name QuakeMapLoader
 extends RefCounted
-## Loads a map with the options of an import, shared by the level and the pieces importer.
+## Loads a map with an import's options, for both importers.
 
 var level := QuakeLevel.new()
 var texture_files: QuakeTextureFiles
@@ -30,7 +30,7 @@ func worldspawn() -> Dictionary:
 	return {}
 
 
-## The worldspawn key _meshlib (qu_meshlib in older maps) marks a map of pieces, any value but "0".
+## The worldspawn key _meshlib or the older qu_meshlib, any value but "0".
 func is_pieces() -> bool:
 	var properties: Dictionary = worldspawn().get("properties", {})
 	for key in ["_meshlib", "qu_meshlib"]:
@@ -39,7 +39,7 @@ func is_pieces() -> bool:
 	return false
 
 
-## How much each liquid kind covers: the worldspawn keys win over the import options.
+## The worldspawn keys win over the import options.
 func liquid_alphas(options: Dictionary) -> Dictionary:
 	var properties: Dictionary = worldspawn().get("properties", {})
 	var alphas := {}
@@ -49,9 +49,8 @@ func liquid_alphas(options: Dictionary) -> Dictionary:
 	return alphas
 
 
-## Where a map's wads are looked for, besides its own folder: the folders of all wads in the project, then the
-## extra ones, usually outside it. The wads of the key wad are found there by file name, and textures they do
-## not have in all of these wads.
+## Besides the map's folder: every folder of the project with a wad, then extra. The key's wads are matched by
+## file name, other textures searched in all wads.
 static func wad_directories(extra: PackedStringArray) -> PackedStringArray:
 	var directories := PackedStringArray()
 	_add_wad_folders("res://", directories)
@@ -62,7 +61,7 @@ static func wad_directories(extra: PackedStringArray) -> PackedStringArray:
 	return directories
 
 
-## Like the FileSystem dock: hidden folders and those with a .gdignore are left out.
+## Skips hidden folders and those with a .gdignore, like the FileSystem dock.
 static func _add_wad_folders(folder: String, directories: PackedStringArray) -> void:
 	if FileAccess.file_exists(folder.path_join(".gdignore")):
 		return

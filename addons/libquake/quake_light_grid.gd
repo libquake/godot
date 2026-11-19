@@ -1,8 +1,7 @@
 @tool
 class_name QuakeLightGrid
 extends Node
-## The level's light on a regular grid, sampled the way Quake lights its models: straight down from each
-## point, read from the lightmap where it hits the floor. QuakeLightReceiver reads it.
+## Light on a grid for models, sampled like Quake: straight down from each point onto the lightmap.
 
 const GROUP := &"quake_light_grid"
 
@@ -25,7 +24,7 @@ static func from_level(level: QuakeLevel, grid_cell_size: float) -> QuakeLightGr
 	return grid
 
 
-## Light at a point in world space, trilinear between the grid points. 1.0 is normal brightness.
+## Trilinear, 1.0 is normal brightness.
 func sample(global_point: Vector3) -> Color:
 	if rgb.is_empty():
 		return Color.WHITE

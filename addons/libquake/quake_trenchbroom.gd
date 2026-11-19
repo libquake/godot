@@ -1,9 +1,8 @@
 @tool
 class_name QuakeTrenchBroom
 extends RefCounted
-## Writes a TrenchBroom game configuration for the project into TrenchBroom's games folder:
-## GameConfig.cfg, <game>.fgd and an icon. The project folder is the game path, so TrenchBroom finds the
-## image textures in res://textures and the maps can be saved anywhere in the project.
+## Writes GameConfig.cfg, <game>.fgd and an icon to TrenchBroom's games folder. The project folder is the
+## game path.
 
 const ICON_PATH := "res://addons/libquake/icons/quake_map.svg"
 
@@ -12,7 +11,6 @@ static func game_name() -> String:
 	return str(ProjectSettings.get_setting("application/config/name", "Godot"))
 
 
-## Where TrenchBroom looks for user game configurations.
 static func games_directory() -> String:
 	match OS.get_name():
 		"macOS":
@@ -75,7 +73,7 @@ static func _game_config() -> String:
 	return JSON.stringify(config, "\t", false)
 
 
-## The first texture folder relative to the project, TrenchBroom's materials root.
+## TrenchBroom's materials root, relative to the project.
 static func _textures_root() -> String:
 	var directories: PackedStringArray = QuakeImportSettings.project_default("textures/texture_directories")
 	return directories[0].trim_prefix("res://") if not directories.is_empty() else "textures"
@@ -93,8 +91,7 @@ static func _write_palette() -> void:
 	file.store_buffer(QuakeLevel.get_default_palette())
 
 
-## Sets the project folder as the game path in TrenchBroom's preferences, unless one is set already.
-## TrenchBroom writes its preferences when it quits, so it should not be running.
+## Unless one is set. TrenchBroom overwrites its preferences when it quits.
 static func _set_game_path() -> void:
 	var preferences_path := games_directory().get_base_dir().path_join("Preferences.json")
 	var preferences := {}

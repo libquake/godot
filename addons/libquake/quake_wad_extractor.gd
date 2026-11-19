@@ -1,13 +1,10 @@
 @tool
 class_name QuakeWadExtractor
 extends RefCounted
-## Writes the textures of a .wad as image files, the way TrenchBroom and the import read them:
-## <directory>/<wad>/<name>.png with "#" for "*", <name>_luma.png for fullbright pixels and <name>_front.png
-## for the clouds of a sky.
+## Writes a wad's textures as <directory>/<wad>/<name>.png, "#" for "*", with _luma and _front images.
 
 
-## The number of textures written, -1 if the wad does not load.
-## Into the project's first texture directory, with a message how it went.
+## Into the first texture directory.
 static func extract_to_project(wad_path: String) -> void:
 	var directories: PackedStringArray = QuakeImportSettings.project_default("textures/texture_directories")
 	var directory := directories[0] if not directories.is_empty() else "res://textures"
@@ -19,6 +16,7 @@ static func extract_to_project(wad_path: String) -> void:
 	EditorInterface.get_resource_filesystem().scan()
 
 
+## The number of textures written, -1 if the wad does not load.
 static func extract(wad_path: String, directory: String) -> int:
 	var wad := QuakeWad.new()
 	if wad.load(ProjectSettings.globalize_path(wad_path)) != OK:

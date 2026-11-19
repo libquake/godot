@@ -1,9 +1,7 @@
 @tool
 class_name QuakeGroundFogGizmo
 extends EditorNode3DGizmoPlugin
-## The box of a QuakeGroundFog and, lighter, the height its style's fog reaches before the hills. A fog of the
-## open scene has a handle on every side: dragging one moves that side, the opposite one stays put. A fog of an
-## imported map has none, its brush sets the box.
+## The box of a QuakeGroundFog and its fog height. Handles move one side each, not on fogs of imported maps.
 
 const BOX_EDGES := QuakeMapGizmo.BOX_EDGES
 ## Handle ids: +x, -x, +y, -y, +z, -z.
@@ -36,7 +34,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		for corner in edge:
 			lines.append(box.get_endpoint(corner))
 	gizmo.add_lines(lines, get_material("box", gizmo))
-	# selecting by the box's edges only, clicks inside reach what stands in the fog
+	# edges only, clicks inside reach what stands in the fog
 	gizmo.add_collision_segments(lines)
 
 	var style := fog.style_in_use()
@@ -61,7 +59,7 @@ func _get_handle_name(_gizmo: EditorNode3DGizmo, handle_id: int, _secondary: boo
 	return ["Right", "Left", "Top", "Bottom", "Back", "Front"][handle_id]
 
 
-## The box before the drag: size, position and where the node was in the world.
+## The box before the drag.
 func _get_handle_value(gizmo: EditorNode3DGizmo, _handle_id: int, _secondary: bool) -> Variant:
 	var fog := gizmo.get_node_3d() as QuakeGroundFog
 	return [fog.size, fog.position, fog.global_transform]
@@ -76,7 +74,6 @@ func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool, cam
 		gizmo.set_meta(&"drag_start", start)
 	var start_size: Vector3 = start[0]
 	var start_transform: Transform3D = start[2]
-	# in the box's space at the start, along the dragged side's axis
 	var to_box := start_transform.affine_inverse()
 	var from: Vector3 = to_box * camera.project_ray_origin(screen_pos)
 	var direction: Vector3 = to_box.basis * camera.project_ray_normal(screen_pos)
@@ -111,7 +108,7 @@ func _commit_handle(gizmo: EditorNode3DGizmo, _handle_id: int, _secondary: bool,
 	undo_redo.commit_action()
 
 
-## Only a fog of the open scene, one in a placed map belongs to the map.
+## Fogs of placed maps belong to the map.
 static func _editable(fog: Node) -> bool:
 	var root := EditorInterface.get_edited_scene_root()
 	return fog == root or fog.owner == root
