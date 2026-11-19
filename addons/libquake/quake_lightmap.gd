@@ -38,6 +38,9 @@ const SOURCE_META := &"quake_lightmap_source"
 @export var luxel_size := 16.0
 ## On other meshes, scaled by their gi_lightmap_texel_scale.
 @export var mesh_luxel_size := 2.0
+## Scales the maps' _dirtdepth on other meshes, small models look better with less. -1 scales it like
+## mesh_luxel_size to luxel_size.
+@export_range(-1.0, 1.0, 0.01) var mesh_dirt_depth_scale := -1.0
 ## Without maps; otherwise the first map's scale counts.
 @export var units_per_meter := 32.0
 ## Meters between the points that light models, 0 is none.
@@ -141,6 +144,7 @@ func bake_to(path := "") -> bool:
 		var group: Dictionary = groups.get_or_add(key, {
 			"vertices": PackedVector3Array(), "normals": PackedVector3Array(), "uv2": PackedVector2Array(),
 			"indices": PackedInt32Array(), "colors": PackedColorArray(), "nodes": [], "texel_scale": texel_scale,
+			"dirt_depth_scale": 1.0 if key is Array else _mesh_dirt_depth_scale(),
 		})
 		if _add_mesh(baker, source, group):
 			group.nodes.append(node)
@@ -151,7 +155,7 @@ func bake_to(path := "") -> bool:
 		if group.indices.is_empty():
 			continue
 		var surface := baker.add_surface(group.vertices, group.normals, group.uv2, group.indices, group.texel_scale,
-				group.colors)
+				group.colors, group.dirt_depth_scale)
 		for node: Node in group.nodes:
 			surfaces.append(surface)
 			result.meshes.append(get_path_to(node))
@@ -429,6 +433,10 @@ func _add_mesh(baker: QuakeLightBaker, source: Dictionary, group: Dictionary) ->
 			group.colors.append(color)
 		lit = true
 	return lit
+
+
+func _mesh_dirt_depth_scale() -> float:
+	return mesh_dirt_depth_scale if mesh_dirt_depth_scale >= 0.0 else mesh_luxel_size / luxel_size
 
 
 ## The average color of a material's albedo, what bounced light takes on.

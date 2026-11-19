@@ -31,10 +31,11 @@ namespace libquake_godot {
 
   int QuakeLightBaker::add_surface(const PackedVector3Array &vertices, const PackedVector3Array &normals,
                                    const PackedVector2Array &uv2, const PackedInt32Array &indices,
-                                   float texel_scale, const PackedColorArray &colors) {
+                                   float texel_scale, const PackedColorArray &colors, float dirt_depth_scale) {
     ERR_FAIL_COND_V(normals.size() != vertices.size() || uv2.size() != vertices.size(), -1);
     Surface surface;
     surface.texelScale = texel_scale > 0 ? texel_scale : 1.0f;
+    surface.dirtDepthScale = dirt_depth_scale;
     quakelib::Vec2 uvMax{-1e30f, -1e30f};
     surface.uvMin = {1e30f, 1e30f};
     for (int64_t i = 0; i + 2 < indices.size(); i += 3) {
@@ -156,6 +157,8 @@ namespace libquake_godot {
         else
           input.colors.insert(input.colors.end(), surface.colors.begin(), surface.colors.end());
       }
+      if (std::any_of(surfaces.begin(), surfaces.end(), [](const Surface &s) { return s.dirtDepthScale != 1.0f; }))
+        input.dirtDepthScales.insert(input.dirtDepthScales.end(), surface.positions.size() / 3, surface.dirtDepthScale);
       input.positions.insert(input.positions.end(), surface.positions.begin(), surface.positions.end());
       input.normals.insert(input.normals.end(), surface.normals.begin(), surface.normals.end());
       for (const auto &uv : surface.uvs) {
@@ -314,8 +317,8 @@ namespace libquake_godot {
 
   void QuakeLightBaker::_bind_methods() {
     ClassDB::bind_method(
-        D_METHOD("add_surface", "vertices", "normals", "uv2", "indices", "texel_scale", "colors"),
-        &QuakeLightBaker::add_surface, DEFVAL(PackedColorArray()));
+        D_METHOD("add_surface", "vertices", "normals", "uv2", "indices", "texel_scale", "colors", "dirt_depth_scale"),
+        &QuakeLightBaker::add_surface, DEFVAL(PackedColorArray()), DEFVAL(1.0f));
     ClassDB::bind_method(D_METHOD("add_occluder", "vertices", "indices", "sky"),
                          &QuakeLightBaker::add_occluder);
     ClassDB::bind_method(D_METHOD("add_light", "type", "position", "direction", "color", "intensity", "range",

@@ -99,7 +99,9 @@ What is baked:
   `shadow_enabled` is on. Baked Godot lights are switched off while the bake is applied.
 - `ambient_light` is added everywhere, `minimum_light` raises dark spots like `_minlight`.
 - `luxel_size` (16 map units) for the brushes of imported maps, `mesh_luxel_size` (2) for every other mesh,
-  scaled by its `gi_lightmap_texel_scale`.
+  scaled by its `gi_lightmap_texel_scale`. `mesh_dirt_depth_scale` scales the maps' `_dirtdepth` on those
+  meshes, -1 like `mesh_luxel_size` to `luxel_size` (2 / 16): the depth that suits a map darkens a small model
+  all over.
 - Quality: `sky_samples` (64) suns per sky dome, `bounces` and `bounce_scale` (-1 as the maps say) and
   `bounce_subdivision` (64 map units per patch), fewer suns and larger patches bake faster. Maps lit for a
   compiler without bounce, like Quake's own, get quite a bit brighter with it; a `bounce_scale` of 0.3 to 0.5
