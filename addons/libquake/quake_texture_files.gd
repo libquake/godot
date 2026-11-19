@@ -29,6 +29,12 @@ func size(texture_name: String) -> Vector2i:
 	return Vector2i(found.get_size()) if found else Vector2i.ZERO
 
 
+## Alpha 0 when there is no image of that name.
+func average_color(texture_name: String) -> Color:
+	var found := texture(texture_name)
+	return QuakeMaterials.average_color(found) if found else Color(0, 0, 0, 0)
+
+
 func emission(texture_name: String) -> Texture2D:
 	var luma := _companion(texture_name, "_luma")
 	return luma if luma else _companion(texture_name, "_glow")

@@ -71,6 +71,11 @@ static func _options() -> Array[Dictionary]:
 		{"name": "lighting/luxel_size", "default": 16.0},
 		# Suns per sky dome (_sunlight2, _sunlight3), fewer bake faster.
 		{"name": "lighting/sky_samples", "default": 64, "hint": PROPERTY_HINT_RANGE, "hint_string": "8,2048"},
+		# Times light bounces off surfaces, -1 as the map's _bounce says.
+		{"name": "lighting/bounces", "default": -1, "hint": PROPERTY_HINT_RANGE, "hint_string": "-1,4"},
+		# Map units per patch that bounces light, larger bake faster.
+		{"name": "lighting/bounce_subdivision", "default": 64.0, "hint": PROPERTY_HINT_RANGE,
+			"hint_string": "16,512"},
 		# Meters between the points that light models, 0 is none.
 		{"name": "lighting/light_grid_cell_size", "default": 1.0},
 		# Off shows the WorldEnvironment's sky.

@@ -31,6 +31,9 @@ namespace libquake_godot {
 
     TextureImage Image(const quakelib::TextureInfo &info);
 
+    /// average color of a wad texture (0..1), gray when no wad has it
+    quakelib::Vec3 AverageColor(const std::string &name);
+
   private:
     quakelib::wad::QuakeWadManager wads;
   };

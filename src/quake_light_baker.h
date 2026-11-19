@@ -22,9 +22,10 @@ namespace libquake_godot {
       LIGHT_SKY_DOME,
     };
 
+    /// colors: one per triangle, the average color of its texture for bounced light, may be empty (gray)
     int add_surface(const godot::PackedVector3Array &vertices, const godot::PackedVector3Array &normals,
                     const godot::PackedVector2Array &uv2, const godot::PackedInt32Array &indices,
-                    float texel_scale);
+                    float texel_scale, const godot::PackedColorArray &colors);
     void add_occluder(const godot::PackedVector3Array &vertices, const godot::PackedInt32Array &indices,
                       bool sky);
     void add_light(LightType type, const godot::Vector3 &position, const godot::Vector3 &direction,
@@ -65,6 +66,14 @@ namespace libquake_godot {
 
     int get_sky_samples() const { return sky_samples; }
 
+    void set_bounces(int value) { bounces = value; }
+
+    int get_bounces() const { return bounces; }
+
+    void set_bounce_subdivision(float value) { bounce_subdivision = value; }
+
+    float get_bounce_subdivision() const { return bounce_subdivision; }
+
   protected:
     static void _bind_methods();
 
@@ -73,6 +82,7 @@ namespace libquake_godot {
       std::vector<quakelib::Vec3> positions; ///< map units, 3 per triangle
       std::vector<quakelib::Vec3> normals;
       std::vector<quakelib::Vec2> uvs; ///< UV2 as in the mesh
+      std::vector<quakelib::Vec3> colors; ///< per triangle, may be empty
       float texelScale = 1.0f;
       quakelib::Vec2 uvMin{0, 0};
       quakelib::Vec2 uvSize{0, 0};
@@ -105,6 +115,9 @@ namespace libquake_godot {
     int padding = 2;
     /// suns per sky dome
     int sky_samples = 64;
+    /// -1 as the maps say
+    int bounces = -1;
+    float bounce_subdivision = 64.0f;
   };
 
 } // namespace libquake_godot

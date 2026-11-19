@@ -57,7 +57,10 @@ namespace libquake_godot {
         options.lightmapUV.luxelSize = luxel_size;
         quakelib::BakeQuality quality;
         quality.skySamples = sky_samples;
+        quality.bounces = bounces;
+        quality.bounceSubdivision = bounce_subdivision;
         options.bakeQuality = quality;
+        options.textureColor = [&](const std::string &name) { return textureColor(name, lookup); };
         options.textureSize = [&](const std::string &name) { return textureSize(name, lookup); };
         level = quakelib::BuildMap(document, options);
       }
@@ -221,6 +224,15 @@ namespace libquake_godot {
     return lookup.Size(name, {missing_texture_size.x, missing_texture_size.y});
   }
 
+  quakelib::Vec3 QuakeLevel::textureColor(const std::string &name, TextureLookup &lookup) const {
+    if (texture_color_provider.is_valid()) {
+      Color color = texture_color_provider.call(String(name.c_str()));
+      if (color.a > 0)
+        return {color.r, color.g, color.b};
+    }
+    return lookup.AverageColor(name);
+  }
+
   PackedByteArray QuakeLevel::get_default_palette() {
     PackedByteArray palette;
     palette.resize(quakelib::wad::default_palette_size);
@@ -261,6 +273,13 @@ namespace libquake_godot {
     ClassDB::bind_method(D_METHOD("get_luxel_size"), &QuakeLevel::get_luxel_size);
     ClassDB::bind_method(D_METHOD("set_sky_samples", "value"), &QuakeLevel::set_sky_samples);
     ClassDB::bind_method(D_METHOD("get_sky_samples"), &QuakeLevel::get_sky_samples);
+    ClassDB::bind_method(D_METHOD("set_bounces", "value"), &QuakeLevel::set_bounces);
+    ClassDB::bind_method(D_METHOD("get_bounces"), &QuakeLevel::get_bounces);
+    ClassDB::bind_method(D_METHOD("set_bounce_subdivision", "value"), &QuakeLevel::set_bounce_subdivision);
+    ClassDB::bind_method(D_METHOD("get_bounce_subdivision"), &QuakeLevel::get_bounce_subdivision);
+    ClassDB::bind_method(D_METHOD("set_texture_color_provider", "value"),
+                         &QuakeLevel::set_texture_color_provider);
+    ClassDB::bind_method(D_METHOD("get_texture_color_provider"), &QuakeLevel::get_texture_color_provider);
     ClassDB::bind_method(D_METHOD("set_csg", "value"), &QuakeLevel::set_csg);
     ClassDB::bind_method(D_METHOD("get_csg"), &QuakeLevel::get_csg);
     ClassDB::bind_method(D_METHOD("set_pivot", "value"), &QuakeLevel::set_pivot);
@@ -285,6 +304,11 @@ namespace libquake_godot {
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bake"), "set_bake", "get_bake");
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "luxel_size"), "set_luxel_size", "get_luxel_size");
     ADD_PROPERTY(PropertyInfo(Variant::INT, "sky_samples"), "set_sky_samples", "get_sky_samples");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "bounces"), "set_bounces", "get_bounces");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bounce_subdivision"), "set_bounce_subdivision",
+                 "get_bounce_subdivision");
+    ADD_PROPERTY(PropertyInfo(Variant::CALLABLE, "texture_color_provider"), "set_texture_color_provider",
+                 "get_texture_color_provider");
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "csg"), "set_csg", "get_csg");
     ADD_PROPERTY(PropertyInfo(Variant::INT, "pivot", PROPERTY_HINT_ENUM,
                               "Map Origin,Center,Bottom Center,Bottom Corner"),

@@ -141,5 +141,21 @@ static func _image_texture(image: Image, mipmaps := false) -> Texture2D:
 
 
 ## A grey grid that still shows the mapping.
+## The average of a texture's pixels, what light bounced off it takes on. Gray without a texture.
+static func average_color(texture: Texture2D) -> Color:
+	var image := texture.get_image() if texture else null
+	if not image:
+		return Color(0.5, 0.5, 0.5)
+	image = image.duplicate()
+	if image.is_compressed():
+		image.decompress()
+	# each halving averages 2 x 2 pixels
+	while image.get_width() > 1 or image.get_height() > 1:
+		image.shrink_x2()
+	var color := image.get_pixel(0, 0)
+	color.a = 1.0
+	return color
+
+
 static func missing_texture() -> Texture2D:
 	return load(MISSING_TEXTURE_PATH)

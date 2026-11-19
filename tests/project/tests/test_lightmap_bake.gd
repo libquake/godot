@@ -86,3 +86,32 @@ static func _entity_mesh(scope: Node, classname: String, properties: Dictionary)
 	var mesh := MeshInstance3D.new()
 	entity.add_child(mesh)
 	return mesh
+
+
+## Light bounced off a lit floor reaches a wall the spot itself misses, tinted like the floor.
+func test_bounce() -> void:
+	var gray := _bounced_wall(0, Color(0.5, 0.5, 0.5))
+	check_equal(gray.r8, 0, "the spot alone leaves the wall dark")
+	var bounced := _bounced_wall(1, Color(0.5, 0.5, 0.5))
+	check(bounced.r8 > 0, "one bounce lights it")
+	check_equal(bounced.r8, bounced.g8, "off a gray floor in gray")
+
+
+## The middle of a wall standing on the edge of a lit floor, both 8 m, a spot pointing down onto the floor.
+func _bounced_wall(bounces: int, floor_color: Color) -> Color:
+	var baker := QuakeLightBaker.new()
+	baker.bounces = bounces
+	var square := PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)])
+	var triangles := PackedInt32Array([0, 1, 2, 0, 2, 3])
+	baker.add_surface(PackedVector3Array([Vector3(0, 0, 0), Vector3(8, 0, 0), Vector3(8, 0, 8), Vector3(0, 0, 8)]),
+			PackedVector3Array([Vector3.UP, Vector3.UP, Vector3.UP, Vector3.UP]), square, triangles, 1.0,
+			PackedColorArray([floor_color, floor_color]))
+	var wall := baker.add_surface(
+			PackedVector3Array([Vector3(8, 0, 0), Vector3(8, 0, 8), Vector3(8, 8, 8), Vector3(8, 8, 0)]),
+			PackedVector3Array([Vector3.LEFT, Vector3.LEFT, Vector3.LEFT, Vector3.LEFT]), square, triangles, 1.0)
+	baker.add_light(QuakeLightBaker.LIGHT_SPOT, Vector3(3, 4, 4), Vector3.DOWN, Color.WHITE, 600.0, 0.0, 60.0, false)
+	baker.bake()
+	var image := baker.get_lightmap_image()
+	var uv := baker.get_surface_uv_transform(wall)
+	var at := Vector2(0.5 * uv.x + uv.z, 0.5 * uv.y + uv.w) * Vector2(image.get_size())
+	return image.get_pixelv(Vector2i(at))

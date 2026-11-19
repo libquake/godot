@@ -31,7 +31,7 @@ namespace libquake_godot {
 
   int QuakeLightBaker::add_surface(const PackedVector3Array &vertices, const PackedVector3Array &normals,
                                    const PackedVector2Array &uv2, const PackedInt32Array &indices,
-                                   float texel_scale) {
+                                   float texel_scale, const PackedColorArray &colors) {
     ERR_FAIL_COND_V(normals.size() != vertices.size() || uv2.size() != vertices.size(), -1);
     Surface surface;
     surface.texelScale = texel_scale > 0 ? texel_scale : 1.0f;
@@ -50,6 +50,11 @@ namespace libquake_godot {
       }
     }
     surface.uvSize = uvMax - surface.uvMin;
+    if (!colors.is_empty()) {
+      ERR_FAIL_COND_V(colors.size() != indices.size() / 3, -1);
+      for (const Color &color : colors)
+        surface.colors.push_back({color.r, color.g, color.b});
+    }
     surfaces.push_back(std::move(surface));
     return static_cast<int>(surfaces.size()) - 1;
   }
@@ -118,6 +123,10 @@ namespace libquake_godot {
     if (!has_worldspawn_options) {
       options.angleScale = mapOptions.angleScale;
       options.rangeScale = mapOptions.rangeScale;
+      options.bounces = mapOptions.bounces;
+      options.bounceScale = mapOptions.bounceScale;
+      options.bounceColorScale = mapOptions.bounceColorScale;
+      options.bounceStyled = mapOptions.bounceStyled;
       has_worldspawn_options = true;
     }
   }
@@ -134,6 +143,13 @@ namespace libquake_godot {
     for (const auto &surface : surfaces) {
       if (surface.width == 0)
         continue;
+      // colors for every triangle once any surface has them, gray for the others
+      if (std::any_of(surfaces.begin(), surfaces.end(), [](const Surface &s) { return !s.colors.empty(); })) {
+        if (surface.colors.empty())
+          input.colors.insert(input.colors.end(), surface.positions.size() / 3, quakelib::Vec3{0.5f, 0.5f, 0.5f});
+        else
+          input.colors.insert(input.colors.end(), surface.colors.begin(), surface.colors.end());
+      }
       input.positions.insert(input.positions.end(), surface.positions.begin(), surface.positions.end());
       input.normals.insert(input.normals.end(), surface.normals.begin(), surface.normals.end());
       for (const auto &uv : surface.uvs) {
@@ -149,6 +165,8 @@ namespace libquake_godot {
       bakeOptions.minLightColor = {1, 1, 1};
     }
     bakeOptions.quality.skySamples = sky_samples;
+    bakeOptions.quality.bounces = bounces;
+    bakeOptions.quality.bounceSubdivision = bounce_subdivision;
     auto baked = quakelib::BakeLightmap(input, occluders, lights, bakeOptions);
     bake_milliseconds = baked.bakeMilliseconds;
 
@@ -284,8 +302,9 @@ namespace libquake_godot {
   }
 
   void QuakeLightBaker::_bind_methods() {
-    ClassDB::bind_method(D_METHOD("add_surface", "vertices", "normals", "uv2", "indices", "texel_scale"),
-                         &QuakeLightBaker::add_surface);
+    ClassDB::bind_method(
+        D_METHOD("add_surface", "vertices", "normals", "uv2", "indices", "texel_scale", "colors"),
+        &QuakeLightBaker::add_surface, DEFVAL(PackedColorArray()));
     ClassDB::bind_method(D_METHOD("add_occluder", "vertices", "indices", "sky"),
                          &QuakeLightBaker::add_occluder);
     ClassDB::bind_method(D_METHOD("add_light", "type", "position", "direction", "color", "intensity", "range",
@@ -313,6 +332,10 @@ namespace libquake_godot {
     ClassDB::bind_method(D_METHOD("get_padding"), &QuakeLightBaker::get_padding);
     ClassDB::bind_method(D_METHOD("set_sky_samples", "value"), &QuakeLightBaker::set_sky_samples);
     ClassDB::bind_method(D_METHOD("get_sky_samples"), &QuakeLightBaker::get_sky_samples);
+    ClassDB::bind_method(D_METHOD("set_bounces", "value"), &QuakeLightBaker::set_bounces);
+    ClassDB::bind_method(D_METHOD("get_bounces"), &QuakeLightBaker::get_bounces);
+    ClassDB::bind_method(D_METHOD("set_bounce_subdivision", "value"), &QuakeLightBaker::set_bounce_subdivision);
+    ClassDB::bind_method(D_METHOD("get_bounce_subdivision"), &QuakeLightBaker::get_bounce_subdivision);
 
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "units_per_meter"), "set_units_per_meter",
                  "get_units_per_meter");
@@ -321,6 +344,9 @@ namespace libquake_godot {
     ADD_PROPERTY(PropertyInfo(Variant::COLOR, "ambient_light"), "set_ambient_light", "get_ambient_light");
     ADD_PROPERTY(PropertyInfo(Variant::INT, "padding"), "set_padding", "get_padding");
     ADD_PROPERTY(PropertyInfo(Variant::INT, "sky_samples"), "set_sky_samples", "get_sky_samples");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "bounces"), "set_bounces", "get_bounces");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bounce_subdivision"), "set_bounce_subdivision",
+                 "get_bounce_subdivision");
 
     BIND_ENUM_CONSTANT(LIGHT_POINT);
     BIND_ENUM_CONSTANT(LIGHT_SPOT);

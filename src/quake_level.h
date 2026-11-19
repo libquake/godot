@@ -67,6 +67,14 @@ namespace libquake_godot {
 
     int get_sky_samples() const { return sky_samples; }
 
+    void set_bounces(int value) { bounces = value; }
+
+    int get_bounces() const { return bounces; }
+
+    void set_bounce_subdivision(float value) { bounce_subdivision = value; }
+
+    float get_bounce_subdivision() const { return bounce_subdivision; }
+
     void set_csg(bool value) { csg = value; }
 
     bool get_csg() const { return csg; }
@@ -82,6 +90,10 @@ namespace libquake_godot {
     void set_texture_size_provider(const godot::Callable &value) { texture_size_provider = value; }
 
     godot::Callable get_texture_size_provider() const { return texture_size_provider; }
+
+    void set_texture_color_provider(const godot::Callable &value) { texture_color_provider = value; }
+
+    godot::Callable get_texture_color_provider() const { return texture_color_provider; }
 
     void set_missing_texture_size(const godot::Vector2i &value) { missing_texture_size = value; }
 
@@ -101,6 +113,7 @@ namespace libquake_godot {
   private:
     std::vector<uint8_t> composedLightmap() const;
     std::pair<int, int> textureSize(const std::string &name, TextureLookup &lookup) const;
+    quakelib::Vec3 textureColor(const std::string &name, TextureLookup &lookup) const;
     const TextureImage *findTexture(const godot::String &name) const;
     godot::Vector3 toGodot(const quakelib::Vec3 &point) const;
 
@@ -111,12 +124,17 @@ namespace libquake_godot {
     bool bake = true;
     float luxel_size = 16.0f;
     int sky_samples = 64;
+    /// -1 as the map says
+    int bounces = -1;
+    float bounce_subdivision = 64.0f;
     bool sky_surfaces = true;
     bool csg = true;
     Pivot pivot = PIVOT_MAP_ORIGIN;
     bool merge_groups = false;
     /// name -> Vector2i pixel size of an image texture, Vector2i() if there is none; comes before the wads
     godot::Callable texture_size_provider;
+    /// name -> average Color of an image texture, alpha 0 if there is none; comes before the wads
+    godot::Callable texture_color_provider;
     /// uv size of textures nobody has, the size of the placeholder that shows how they are mapped
     godot::Vector2i missing_texture_size{64, 64};
     godot::PackedStringArray wad_directories;

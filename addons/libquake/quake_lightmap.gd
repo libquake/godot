@@ -46,6 +46,10 @@ const SOURCE_META := &"quake_lightmap_source"
 @export_group("Quality")
 ## Suns per sky dome (_sunlight2, _sunlight3), fewer bake faster.
 @export_range(8, 2048) var sky_samples := 64
+## Times light bounces off surfaces, -1 as the maps' _bounce says.
+@export_range(-1, 4) var bounces := -1
+## Map units per patch that bounces light, larger bake faster.
+@export_range(16, 512) var bounce_subdivision := 64.0
 
 var _applied: Array[Dictionary] = []
 var _switched_off_lights: Array[Light3D] = []
@@ -54,6 +58,7 @@ var _grid: QuakeLightGrid
 var _paused_styles: Array[QuakeLightStyles] = []
 var _styles: QuakeLightStyles
 var _materials: Dictionary[Material, Material] = {}
+var _surface_colors: Dictionary[Material, Color] = {}
 var _bake_thread: Thread
 
 
@@ -102,11 +107,14 @@ func bake_to(path := "") -> bool:
 		return false
 
 	var baker := QuakeLightBaker.new()
+	_surface_colors.clear()
 	baker.units_per_meter = _units_per_meter()
 	baker.luxel_size = luxel_size
 	baker.minimum_light = minimum_light
 	baker.ambient_light = ambient_light
 	baker.sky_samples = sky_samples
+	baker.bounces = bounces
+	baker.bounce_subdivision = bounce_subdivision
 	var result := QuakeLightmapData.new()
 	var groups := {}
 	for source in _static_geometry():
@@ -117,7 +125,7 @@ func bake_to(path := "") -> bool:
 			texel_scale *= luxel_size / mesh_luxel_size
 		var group: Dictionary = groups.get_or_add(key, {
 			"vertices": PackedVector3Array(), "normals": PackedVector3Array(), "uv2": PackedVector2Array(),
-			"indices": PackedInt32Array(), "nodes": [], "texel_scale": texel_scale,
+			"indices": PackedInt32Array(), "colors": PackedColorArray(), "nodes": [], "texel_scale": texel_scale,
 		})
 		if _add_mesh(baker, source, group):
 			group.nodes.append(node)
@@ -127,7 +135,8 @@ func bake_to(path := "") -> bool:
 	for group: Dictionary in groups.values():
 		if group.indices.is_empty():
 			continue
-		var surface := baker.add_surface(group.vertices, group.normals, group.uv2, group.indices, group.texel_scale)
+		var surface := baker.add_surface(group.vertices, group.normals, group.uv2, group.indices, group.texel_scale,
+				group.colors)
 		for node: Node in group.nodes:
 			surfaces.append(surface)
 			result.meshes.append(get_path_to(node))
@@ -371,8 +380,32 @@ func _add_mesh(baker: QuakeLightBaker, source: Dictionary, group: Dictionary) ->
 		group.uv2.append_array(arrays[Mesh.ARRAY_TEX_UV2])
 		for index in surface_indices:
 			group.indices.append(index + offset)
+		var color := _surface_color(material)
+		for corner in range(0, surface_indices.size(), 3):
+			group.colors.append(color)
 		lit = true
 	return lit
+
+
+## The average color of a material's albedo, what bounced light takes on.
+func _surface_color(material: Material) -> Color:
+	if _surface_colors.has(material):
+		return _surface_colors[material]
+	var color := Color(0.5, 0.5, 0.5)
+	var texture: Texture2D
+	var albedo := Color.WHITE
+	if material is BaseMaterial3D:
+		texture = material.albedo_texture
+		albedo = material.albedo_color
+	elif material is ShaderMaterial and material.shader == QuakeMaterials.WORLD_SHADER:
+		texture = material.get_shader_parameter(&"albedo_texture")
+		var parameter: Variant = material.get_shader_parameter(&"albedo_color")
+		if parameter != null:
+			albedo = parameter
+	if material is BaseMaterial3D or texture:
+		color = (QuakeMaterials.average_color(texture) if texture else Color.WHITE) * albedo
+	_surface_colors[material] = color
+	return color
 
 
 ## A map's meshes share its layout and bake as one, other meshes get their own place.

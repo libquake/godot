@@ -27,6 +27,27 @@ namespace libquake_godot {
     return fallback;
   }
 
+  quakelib::Vec3 TextureLookup::AverageColor(const std::string &name) {
+    auto *texture = wads.FindTexture(name);
+    double sum[3] = {0, 0, 0};
+    size_t count = 0;
+    if (texture) {
+      // transparent pixels of '{' textures left out
+      for (const auto &c : texture->raw) {
+        if (c.rgba[3] == 0)
+          continue;
+
+        for (int k = 0; k < 3; k++)
+          sum[k] += c.rgba[k];
+        count++;
+      }
+    }
+    if (count == 0)
+      return {0.5f, 0.5f, 0.5f};
+
+    return {(float)(sum[0] / count / 255), (float)(sum[1] / count / 255), (float)(sum[2] / count / 255)};
+  }
+
   TextureImage TextureLookup::Image(const quakelib::TextureInfo &info) {
     if (!info.rgba.empty())
       return {info.width, info.height, info.rgba, info.emission, info.skyFront};

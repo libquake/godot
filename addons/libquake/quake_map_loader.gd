@@ -17,9 +17,12 @@ func _init(source_file: String, options: Dictionary, merge_groups := false) -> v
 	level.bake = options.get("lighting/bake", false)
 	level.luxel_size = options.get("lighting/luxel_size", 16.0)
 	level.sky_samples = options.get("lighting/sky_samples", 64)
+	level.bounces = options.get("lighting/bounces", -1)
+	level.bounce_subdivision = options.get("lighting/bounce_subdivision", 64.0)
 	level.sky_surfaces = options.get("surfaces/draw_sky", true)
 	level.wad_directories = wad_directories(options.get("textures/wad_directories", PackedStringArray()))
 	level.texture_size_provider = texture_files.size
+	level.texture_color_provider = texture_files.average_color
 	level.missing_texture_size = Vector2i(QuakeMaterials.missing_texture().get_size())
 	error = level.load(ProjectSettings.globalize_path(source_file))
 
