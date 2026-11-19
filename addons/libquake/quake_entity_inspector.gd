@@ -50,13 +50,29 @@ func _map_panel(map: QuakeMap) -> Control:
 	return panel
 
 
+## One short line per kind, the whole text in the tooltip and the Output.
 func _warnings(lines: PackedStringArray) -> Control:
 	var label := Label.new()
-	label.text = "Import warnings:\n- " + "\n- ".join(lines)
+	label.text = "Import warnings, the Output lists them all:\n- " + "\n- ".join(summarize_warnings(lines))
+	label.tooltip_text = "\n".join(lines)
+	label.mouse_filter = Control.MOUSE_FILTER_PASS
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size.x = 100.0
 	label.add_theme_color_override(&"font_color", EditorInterface.get_editor_theme().get_color(&"warning_color", &"Editor"))
 	return label
+
+
+## "missing textures (37)" for "missing textures: a, b, ...", lines without a list count one each.
+static func summarize_warnings(lines: PackedStringArray) -> PackedStringArray:
+	var counts := {}
+	for line in lines:
+		var listed := line.contains(": ")
+		var kind := line.get_slice(": ", 0) if listed else "targets that no targetname matches"
+		counts[kind] = counts.get(kind, 0) + (line.get_slice(": ", 1).split(", ").size() if listed else 1)
+	var summary := PackedStringArray()
+	for kind: String in counts:
+		summary.append("%s (%d)" % [kind, counts[kind]])
+	return summary
 
 
 ## target, targetname and killtarget are buttons to the other end.

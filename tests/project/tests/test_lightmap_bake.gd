@@ -177,3 +177,15 @@ func test_edits_on_baked_world_materials_are_kept() -> void:
 	baked.set_shader_parameter(&"albedo_color", Vector4(0, 1, 0, 1))
 	QuakeLightmap._source(baked)
 	check_equal(QuakeLightmap._albedo_color(source), Color.GREEN, "the color set on the baked material")
+
+
+## UV2 sets that cannot hold a lightmap are named, a usable one is not.
+func test_unusable_uv2_is_named() -> void:
+	var triangles := PackedInt32Array([0, 1, 2, 0, 2, 3])
+	var square := PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)])
+	check_equal(QuakeLightmap.uv2_problem(square, triangles), "", "a square")
+	var tiled := PackedVector2Array([Vector2(0, 0), Vector2(6.9, 0), Vector2(6.9, 1), Vector2(0, 1)])
+	check(QuakeLightmap.uv2_problem(tiled, triangles).contains("outside"), "past 0..1")
+	var speck := PackedVector2Array([Vector2(0, 0), Vector2(0.1, 0), Vector2(0.1, 0.1), Vector2(0, 0.1)])
+	check(QuakeLightmap.uv2_problem(speck, triangles).contains("1%"), "a speck")
+	check(QuakeLightmap.uv2_problem(square, triangles + triangles).contains("over each other"), "twice over")

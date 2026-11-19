@@ -421,6 +421,10 @@ func _add_mesh(baker: QuakeLightBaker, source: Dictionary, group: Dictionary) ->
 			baker.add_occluder(surface_vertices, surface_indices, sky)
 		if sky or not _takes_lightmap(material) or not arrays[Mesh.ARRAY_TEX_UV2] or not arrays[Mesh.ARRAY_NORMAL]:
 			continue
+		var problem := uv2_problem(arrays[Mesh.ARRAY_TEX_UV2], surface_indices)
+		if problem:
+			push_warning("QuakeLightmap: %s, surface %d: its UV2 %s, the baked light on it will be wrong. Import it with "
+					% [_scope().get_path_to(node), surface, problem] + "Light Baking set to Static Lightmaps.")
 		var offset: int = group.vertices.size()
 		group.vertices.append_array(surface_vertices)
 		for normal: Vector3 in arrays[Mesh.ARRAY_NORMAL]:
@@ -437,6 +441,23 @@ func _add_mesh(baker: QuakeLightBaker, source: Dictionary, group: Dictionary) ->
 
 func _mesh_dirt_depth_scale() -> float:
 	return mesh_dirt_depth_scale if mesh_dirt_depth_scale >= 0.0 else mesh_luxel_size / luxel_size
+
+
+## Why a UV2 can not hold a lightmap, empty if it can. Meshes with UV sets from elsewhere often have one that
+## reaches past 0..1, squeezes the mesh into a speck or lays parts over each other.
+static func uv2_problem(uv2: PackedVector2Array, indices: PackedInt32Array) -> String:
+	for uv in uv2:
+		if uv.x < -0.01 or uv.y < -0.01 or uv.x > 1.01 or uv.y > 1.01:
+			return "reaches outside 0..1"
+	var area := 0.0
+	for i in range(0, indices.size() - 2, 3):
+		var a := uv2[indices[i]]
+		area += absf((uv2[indices[i + 1]] - a).cross(uv2[indices[i + 2]] - a)) * 0.5
+	if area < 0.05:
+		return "covers only %d%% of its square" % maxi(1, roundi(area * 100.0))
+	if area > 1.01:
+		return "lays parts over each other"
+	return ""
 
 
 ## The average color of a material's albedo, what bounced light takes on.

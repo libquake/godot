@@ -92,7 +92,9 @@ What is baked:
   when they are baked. Meshes below a `RigidBody3D` or `CharacterBody3D` move and are left out; doors
   (`AnimatableBody3D`) are lit where they stand. Surfaces with a Quake world material or a
   `StandardMaterial3D` get the lightmap, every other surface only casts shadows. Liquids let light through,
-  sky only lets the sun in. Brush entities cast shadows with the key `_shadow 1`.
+  sky only lets the sun in. Brush entities cast shadows with the key `_shadow 1`. Imported models need
+  Light Baking set to Static Lightmaps, so Godot unwraps their UV2: the UV sets models bring along often reach
+  past 0..1, squeeze the model into a speck or overlap. The bake names such meshes in the Output.
 - **Lights**, each group with its own switch: `Light3D`s with `light_bake_mode` Static (`godot_lights`), the
   `light*` entities of imported maps (`quake_lights`) and their worldspawn (`worldspawn`). A Godot light with
   energy 1 is a Quake light of `light_intensity` (300) fading out linearly at its range, with shadows if

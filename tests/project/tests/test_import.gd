@@ -110,3 +110,15 @@ func test_brush_entities_are_drawn_a_little_off() -> void:
 	check(wall.get_node("Mesh").position.y < 0.0, "a func_wall sinks below a floor it is flush with")
 	check_equal(world.get_node("Mesh").position, Vector3.ZERO, "the world stays")
 	check(wall.get_child_count() > 1 and not wall.get_children().any(func(c: Node) -> bool: return c is CollisionShape3D and c.position != Vector3.ZERO), "its collision stays")
+
+
+## The inspector names the kinds of warnings, the Output has the lists.
+func test_warnings_are_summed_up() -> void:
+	var inspector: GDScript = load("res://addons/libquake/quake_entity_inspector.gd")
+	var lines := PackedStringArray([
+		"missing textures: wall1, wall2, floor3",
+		"door targets \"a\", no entity has that targetname",
+		"button targets \"b\", no entity has that targetname",
+	])
+	check_equal(inspector.summarize_warnings(lines),
+			PackedStringArray(["missing textures (3)", "targets that no targetname matches (2)"]), "one line per kind")
