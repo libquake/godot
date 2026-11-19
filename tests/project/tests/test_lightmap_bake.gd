@@ -186,8 +186,12 @@ func test_unusable_uv2_is_named() -> void:
 	check_equal(QuakeLightmap.uv2_problem(square, triangles), "", "a square")
 	var tiled := PackedVector2Array([Vector2(0, 0), Vector2(6.9, 0), Vector2(6.9, 1), Vector2(0, 1)])
 	check(QuakeLightmap.uv2_problem(tiled, triangles).contains("outside"), "past 0..1")
-	var speck := PackedVector2Array([Vector2(0, 0), Vector2(0.1, 0), Vector2(0.1, 0.1), Vector2(0, 0.1)])
-	check(QuakeLightmap.uv2_problem(speck, triangles).contains("1%"), "a speck")
+	var corner := PackedVector2Array([Vector2(0, 0), Vector2(0.1, 0), Vector2(0.1, 0.1), Vector2(0, 0.1)])
+	check_equal(QuakeLightmap.uv2_problem(corner, triangles), "", "a corner of 0..1, the baker takes what it spans")
+	# two small triangles at opposite corners span the whole square
+	var sparse := PackedVector2Array([Vector2(0, 0), Vector2(0.1, 0), Vector2(0, 0.1),
+			Vector2(1, 1), Vector2(0.9, 1), Vector2(1, 0.9)])
+	check(QuakeLightmap.uv2_problem(sparse, PackedInt32Array([0, 1, 2, 3, 4, 5])).contains("1%"), "nearly empty")
 	check(QuakeLightmap.uv2_problem(square, triangles + triangles).contains("over each other"), "twice over")
 
 

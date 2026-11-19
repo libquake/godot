@@ -152,6 +152,8 @@ func bake_to(path := "") -> bool:
 			"vertices": PackedVector3Array(), "normals": PackedVector3Array(), "uv2": PackedVector2Array(),
 			"indices": PackedInt32Array(), "colors": PackedColorArray(), "nodes": [], "texel_scale": texel_scale,
 			"dirt_depth_scale": 1.0 if key is Array else _dirt_depth_scale(source, level),
+			# maps and their pieces share an atlas laid out by libquake, only models bring a UV2 of their own
+			"own_uv2": not level,
 		})
 		if _add_mesh(baker, source, group):
 			group.nodes.append(node)
@@ -428,7 +430,7 @@ func _add_mesh(baker: QuakeLightBaker, source: Dictionary, group: Dictionary) ->
 			baker.add_occluder(surface_vertices, surface_indices, sky)
 		if sky or not _takes_lightmap(material) or not arrays[Mesh.ARRAY_TEX_UV2] or not arrays[Mesh.ARRAY_NORMAL]:
 			continue
-		var problem := uv2_problem(arrays[Mesh.ARRAY_TEX_UV2], surface_indices)
+		var problem := uv2_problem(arrays[Mesh.ARRAY_TEX_UV2], surface_indices) if group.own_uv2 else ""
 		if problem:
 			push_warning("QuakeLightmap: %s, surface %d: its UV2 %s, the baked light on it will be wrong. Import it with "
 					% [_scope().get_path_to(node), surface, problem] + "Light Baking set to Static Lightmaps.")
@@ -469,19 +471,27 @@ func _model_meta(source: Dictionary, name: StringName, default: Variant) -> Vari
 	return mesh.get_meta(name) if mesh and mesh.has_meta(name) else default
 
 
-## Why a UV2 can not hold a lightmap, empty if it can. Meshes with UV sets from elsewhere often have one that
-## reaches past 0..1, squeezes the mesh into a speck or lays parts over each other.
+## Why a model's UV2 can not hold a lightmap, empty if it can. UV sets from elsewhere often reach past 0..1,
+## leave the space they span nearly empty, so the mesh gets few texels, or lay parts over each other. The baker
+## gives the space a UV2 spans the size its density asks for, how much of 0..1 it uses does not matter.
 static func uv2_problem(uv2: PackedVector2Array, indices: PackedInt32Array) -> String:
+	var low := Vector2(INF, INF)
+	var high := -low
 	for uv in uv2:
 		if uv.x < -0.01 or uv.y < -0.01 or uv.x > 1.01 or uv.y > 1.01:
 			return "reaches outside 0..1"
+		low = low.min(uv)
+		high = high.max(uv)
+	var span := (high - low).x * (high - low).y
+	if span <= 0.0:
+		return ""
 	var area := 0.0
 	for i in range(0, indices.size() - 2, 3):
 		var a := uv2[indices[i]]
 		area += absf((uv2[indices[i + 1]] - a).cross(uv2[indices[i + 2]] - a)) * 0.5
-	if area < 0.05:
-		return "covers only %d%% of its square" % maxi(1, roundi(area * 100.0))
-	if area > 1.01:
+	if area < 0.05 * span:
+		return "covers only %d%% of the space it spans" % maxi(1, roundi(area / span * 100.0))
+	if area > 1.01 * span:
 		return "lays parts over each other"
 	return ""
 
