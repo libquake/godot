@@ -34,6 +34,16 @@ target_include_directories(quakelib_static PUBLIC "${LIBQUAKE_DIR}/include")
 find_package(Threads REQUIRED)
 target_link_libraries(quakelib_static PUBLIC Threads::Threads)
 
+# the baker's ray backend: Embree where libquake has a prebuilt for the platform, its own bvh elsewhere.
+# Releases up to v1.1.0 keep the bvh inside the baker.
+if(EXISTS "${LIBQUAKE_DIR}/cmake/embree.cmake")
+  include("${LIBQUAKE_DIR}/cmake/embree.cmake")
+  target_sources(quakelib_static PRIVATE ${QLIB_BVH_SOURCE})
+  if(TARGET quakelib_embree)
+    target_link_libraries(quakelib_static PUBLIC quakelib_embree)
+  endif()
+endif()
+
 add_library(libquake_godot SHARED
   src/register_types.cpp
   src/quake_level.cpp
