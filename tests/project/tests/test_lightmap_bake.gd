@@ -115,3 +115,16 @@ func _bounced_wall(bounces: int, floor_color: Color) -> Color:
 	var uv := baker.get_surface_uv_transform(wall)
 	var at := Vector2(0.5 * uv.x + uv.z, 0.5 * uv.y + uv.w) * Vector2(image.get_size())
 	return image.get_pixelv(Vector2i(at))
+
+
+## The world shader's albedo_color comes back as a Vector4 when it was set as one.
+func test_surface_color_of_world_materials() -> void:
+	var lightmap := QuakeLightmap.new()
+	var image := Image.create(2, 2, false, Image.FORMAT_RGBA8)
+	image.fill(Color.WHITE)
+	var material := ShaderMaterial.new()
+	material.shader = QuakeMaterials.WORLD_SHADER
+	material.set_shader_parameter(&"albedo_texture", ImageTexture.create_from_image(image))
+	material.set_shader_parameter(&"albedo_color", Vector4(0.5, 1.0, 1.0, 1.0))
+	check_equal(lightmap._surface_color(material), Color(0.5, 1.0, 1.0, 1.0), "texture average times albedo_color")
+	lightmap.free()
