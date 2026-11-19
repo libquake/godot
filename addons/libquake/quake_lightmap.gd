@@ -48,6 +48,8 @@ const SOURCE_META := &"quake_lightmap_source"
 @export_range(8, 2048) var sky_samples := 64
 ## Times light bounces off surfaces, -1 as the maps' _bounce says.
 @export_range(-1, 4) var bounces := -1
+## Brightness of the bounced light, -1 as the maps' _bouncescale says. Lower it for maps lit without bounce.
+@export_range(-1.0, 2.0, 0.05) var bounce_scale := -1.0
 ## Map units per patch that bounces light, larger bake faster.
 @export_range(16, 512) var bounce_subdivision := 64.0
 
@@ -115,6 +117,7 @@ func bake_to(path := "") -> bool:
 	baker.sky_samples = sky_samples
 	baker.bounces = bounces
 	baker.bounce_subdivision = bounce_subdivision
+	baker.bounce_scale = bounce_scale
 	var result := QuakeLightmapData.new()
 	var groups := {}
 	for source in _static_geometry():

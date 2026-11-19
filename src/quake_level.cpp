@@ -59,6 +59,7 @@ namespace libquake_godot {
         quality.skySamples = sky_samples;
         quality.bounces = bounces;
         quality.bounceSubdivision = bounce_subdivision;
+        quality.bounceScale = bounce_scale;
         options.bakeQuality = quality;
         options.textureColor = [&](const std::string &name) { return textureColor(name, lookup); };
         options.textureSize = [&](const std::string &name) { return textureSize(name, lookup); };
@@ -277,6 +278,8 @@ namespace libquake_godot {
     ClassDB::bind_method(D_METHOD("get_bounces"), &QuakeLevel::get_bounces);
     ClassDB::bind_method(D_METHOD("set_bounce_subdivision", "value"), &QuakeLevel::set_bounce_subdivision);
     ClassDB::bind_method(D_METHOD("get_bounce_subdivision"), &QuakeLevel::get_bounce_subdivision);
+    ClassDB::bind_method(D_METHOD("set_bounce_scale", "value"), &QuakeLevel::set_bounce_scale);
+    ClassDB::bind_method(D_METHOD("get_bounce_scale"), &QuakeLevel::get_bounce_scale);
     ClassDB::bind_method(D_METHOD("set_texture_color_provider", "value"),
                          &QuakeLevel::set_texture_color_provider);
     ClassDB::bind_method(D_METHOD("get_texture_color_provider"), &QuakeLevel::get_texture_color_provider);
@@ -307,6 +310,7 @@ namespace libquake_godot {
     ADD_PROPERTY(PropertyInfo(Variant::INT, "bounces"), "set_bounces", "get_bounces");
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bounce_subdivision"), "set_bounce_subdivision",
                  "get_bounce_subdivision");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bounce_scale"), "set_bounce_scale", "get_bounce_scale");
     ADD_PROPERTY(PropertyInfo(Variant::CALLABLE, "texture_color_provider"), "set_texture_color_provider",
                  "get_texture_color_provider");
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "csg"), "set_csg", "get_csg");

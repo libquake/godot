@@ -74,6 +74,10 @@ namespace libquake_godot {
 
     float get_bounce_subdivision() const { return bounce_subdivision; }
 
+    void set_bounce_scale(float value) { bounce_scale = value; }
+
+    float get_bounce_scale() const { return bounce_scale; }
+
   protected:
     static void _bind_methods();
 
@@ -118,6 +122,8 @@ namespace libquake_godot {
     /// -1 as the maps say
     int bounces = -1;
     float bounce_subdivision = 64.0f;
+    /// negative as the map says
+    float bounce_scale = -1.0f;
   };
 
 } // namespace libquake_godot

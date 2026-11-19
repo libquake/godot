@@ -100,8 +100,10 @@ What is baked:
 - `ambient_light` is added everywhere, `minimum_light` raises dark spots like `_minlight`.
 - `luxel_size` (16 map units) for the brushes of imported maps, `mesh_luxel_size` (2) for every other mesh,
   scaled by its `gi_lightmap_texel_scale`.
-- Quality: `sky_samples` (64) suns per sky dome, `bounces` (-1 as the maps say) and `bounce_subdivision` (64
-  map units per patch), fewer suns and larger patches bake faster. Bounced light takes on the average color of
+- Quality: `sky_samples` (64) suns per sky dome, `bounces` and `bounce_scale` (-1 as the maps say) and
+  `bounce_subdivision` (64 map units per patch), fewer suns and larger patches bake faster. Maps lit for a
+  compiler without bounce, like Quake's own, get quite a bit brighter with it; a `bounce_scale` of 0.3 to 0.5
+  keeps them closer to how they looked. Bounced light takes on the average color of
   a surface's albedo texture as much as the map's `_bouncecolorscale` says.
 - Models are lit by a light grid built from the bake, it replaces the grids of the maps it covers.
 

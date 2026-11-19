@@ -19,6 +19,7 @@ Each map has its options in the Import dock. Their defaults for new maps are in 
 | `lighting/luxel_size` | 16 | map units per lightmap texel, 16 matches Quake |
 | `lighting/sky_samples` | 64 | suns per sky dome (`_sunlight2`, `_sunlight3`), fewer bake faster |
 | `lighting/bounces` | -1 | times light bounces off surfaces, -1 as the map's `_bounce` says |
+| `lighting/bounce_scale` | -1 | brightness of the bounced light, -1 as the map's `_bouncescale` says; lower it for maps lit without bounce |
 | `lighting/bounce_subdivision` | 64 | map units per patch that bounces light, larger bake faster |
 | `lighting/light_grid_cell_size` | 1 | meters between the points that light models, 0 leaves the grid out |
 

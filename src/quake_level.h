@@ -75,6 +75,10 @@ namespace libquake_godot {
 
     float get_bounce_subdivision() const { return bounce_subdivision; }
 
+    void set_bounce_scale(float value) { bounce_scale = value; }
+
+    float get_bounce_scale() const { return bounce_scale; }
+
     void set_csg(bool value) { csg = value; }
 
     bool get_csg() const { return csg; }
@@ -127,6 +131,8 @@ namespace libquake_godot {
     /// -1 as the map says
     int bounces = -1;
     float bounce_subdivision = 64.0f;
+    /// negative as the map says
+    float bounce_scale = -1.0f;
     bool sky_surfaces = true;
     bool csg = true;
     Pivot pivot = PIVOT_MAP_ORIGIN;

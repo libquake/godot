@@ -73,6 +73,8 @@ static func _options() -> Array[Dictionary]:
 		{"name": "lighting/sky_samples", "default": 64, "hint": PROPERTY_HINT_RANGE, "hint_string": "8,2048"},
 		# Times light bounces off surfaces, -1 as the map's _bounce says.
 		{"name": "lighting/bounces", "default": -1, "hint": PROPERTY_HINT_RANGE, "hint_string": "-1,4"},
+		# Brightness of the bounced light, -1 as the map's _bouncescale says. Lower it for maps lit without bounce.
+		{"name": "lighting/bounce_scale", "default": -1.0, "hint": PROPERTY_HINT_RANGE, "hint_string": "-1,2,0.05"},
 		# Map units per patch that bounces light, larger bake faster.
 		{"name": "lighting/bounce_subdivision", "default": 64.0, "hint": PROPERTY_HINT_RANGE,
 			"hint_string": "16,512"},

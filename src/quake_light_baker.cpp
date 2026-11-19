@@ -167,6 +167,7 @@ namespace libquake_godot {
     bakeOptions.quality.skySamples = sky_samples;
     bakeOptions.quality.bounces = bounces;
     bakeOptions.quality.bounceSubdivision = bounce_subdivision;
+    bakeOptions.quality.bounceScale = bounce_scale;
     auto baked = quakelib::BakeLightmap(input, occluders, lights, bakeOptions);
     bake_milliseconds = baked.bakeMilliseconds;
 
@@ -336,6 +337,8 @@ namespace libquake_godot {
     ClassDB::bind_method(D_METHOD("get_bounces"), &QuakeLightBaker::get_bounces);
     ClassDB::bind_method(D_METHOD("set_bounce_subdivision", "value"), &QuakeLightBaker::set_bounce_subdivision);
     ClassDB::bind_method(D_METHOD("get_bounce_subdivision"), &QuakeLightBaker::get_bounce_subdivision);
+    ClassDB::bind_method(D_METHOD("set_bounce_scale", "value"), &QuakeLightBaker::set_bounce_scale);
+    ClassDB::bind_method(D_METHOD("get_bounce_scale"), &QuakeLightBaker::get_bounce_scale);
 
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "units_per_meter"), "set_units_per_meter",
                  "get_units_per_meter");
@@ -347,6 +350,7 @@ namespace libquake_godot {
     ADD_PROPERTY(PropertyInfo(Variant::INT, "bounces"), "set_bounces", "get_bounces");
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bounce_subdivision"), "set_bounce_subdivision",
                  "get_bounce_subdivision");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bounce_scale"), "set_bounce_scale", "get_bounce_scale");
 
     BIND_ENUM_CONSTANT(LIGHT_POINT);
     BIND_ENUM_CONSTANT(LIGHT_SPOT);

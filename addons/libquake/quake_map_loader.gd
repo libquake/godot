@@ -19,6 +19,7 @@ func _init(source_file: String, options: Dictionary, merge_groups := false) -> v
 	level.sky_samples = options.get("lighting/sky_samples", 64)
 	level.bounces = options.get("lighting/bounces", -1)
 	level.bounce_subdivision = options.get("lighting/bounce_subdivision", 64.0)
+	level.bounce_scale = options.get("lighting/bounce_scale", -1.0)
 	level.sky_surfaces = options.get("surfaces/draw_sky", true)
 	level.wad_directories = wad_directories(options.get("textures/wad_directories", PackedStringArray()))
 	level.texture_size_provider = texture_files.size
