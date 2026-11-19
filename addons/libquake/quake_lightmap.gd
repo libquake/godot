@@ -8,6 +8,9 @@ extends Node3D
 const RECT_PARAMETER := &"lightmap_rect"
 ## On a baked material: its source.
 const SOURCE_META := &"quake_lightmap_source"
+## On a mesh node, a node above it or a Mesh: scales the maps' _dirtdepth there instead of
+## mesh_dirt_depth_scale, 0 is no ambient occlusion. Pieces imported from maps carry 1, they are architecture.
+const DIRT_META := &"quake_dirt_depth_scale"
 
 ## Clear to remove the bake.
 @export var data: QuakeLightmapData:
@@ -144,7 +147,7 @@ func bake_to(path := "") -> bool:
 		var group: Dictionary = groups.get_or_add(key, {
 			"vertices": PackedVector3Array(), "normals": PackedVector3Array(), "uv2": PackedVector2Array(),
 			"indices": PackedInt32Array(), "colors": PackedColorArray(), "nodes": [], "texel_scale": texel_scale,
-			"dirt_depth_scale": 1.0 if key is Array else _mesh_dirt_depth_scale(),
+			"dirt_depth_scale": 1.0 if key is Array else _dirt_depth_scale(source),
 		})
 		if _add_mesh(baker, source, group):
 			group.nodes.append(node)
@@ -439,7 +442,18 @@ func _add_mesh(baker: QuakeLightBaker, source: Dictionary, group: Dictionary) ->
 	return lit
 
 
-func _mesh_dirt_depth_scale() -> float:
+## DIRT_META on the node or above, then on its mesh, then mesh_dirt_depth_scale.
+func _dirt_depth_scale(source: Dictionary) -> float:
+	var node: Node = source.node
+	while node:
+		if node.has_meta(DIRT_META):
+			return node.get_meta(DIRT_META)
+		if node == _scope():
+			break
+		node = node.get_parent()
+	var mesh: Mesh = source.mesh
+	if mesh and mesh.has_meta(DIRT_META):
+		return mesh.get_meta(DIRT_META)
 	return mesh_dirt_depth_scale if mesh_dirt_depth_scale >= 0.0 else mesh_luxel_size / luxel_size
 
 

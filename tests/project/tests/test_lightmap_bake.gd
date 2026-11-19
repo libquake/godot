@@ -189,3 +189,25 @@ func test_unusable_uv2_is_named() -> void:
 	var speck := PackedVector2Array([Vector2(0, 0), Vector2(0.1, 0), Vector2(0.1, 0.1), Vector2(0, 0.1)])
 	check(QuakeLightmap.uv2_problem(speck, triangles).contains("1%"), "a speck")
 	check(QuakeLightmap.uv2_problem(square, triangles + triangles).contains("over each other"), "twice over")
+
+
+## The ambient occlusion depth of a mesh: its node or one above, then its mesh, then mesh_dirt_depth_scale.
+func test_dirt_depth_per_model() -> void:
+	var scope := Node3D.new()
+	add_child(scope)
+	var lightmap := QuakeLightmap.new()
+	scope.add_child(lightmap)
+	var group := Node3D.new()
+	scope.add_child(group)
+	var node := MeshInstance3D.new()
+	group.add_child(node)
+	var mesh := BoxMesh.new()
+	var source := {"node": node, "mesh": mesh}
+	check_equal(lightmap._dirt_depth_scale(source), lightmap.mesh_luxel_size / lightmap.luxel_size, "the default")
+	mesh.set_meta(QuakeLightmap.DIRT_META, 1.0)
+	check_equal(lightmap._dirt_depth_scale(source), 1.0, "from the mesh")
+	group.set_meta(QuakeLightmap.DIRT_META, 0.0)
+	check_equal(lightmap._dirt_depth_scale(source), 0.0, "a node above wins")
+	node.set_meta(QuakeLightmap.DIRT_META, 0.5)
+	check_equal(lightmap._dirt_depth_scale(source), 0.5, "the node itself wins")
+	scope.queue_free()

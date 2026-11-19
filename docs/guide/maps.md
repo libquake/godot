@@ -65,7 +65,9 @@ Each piece is saved as a file of its own, by default in a folder named like the 
 (`maps/pieces.map` puts them in `maps/pieces/`). In the FileSystem dock's thumbnail view the folder is a palette:
 drag a piece into the 3D viewport and Godot puts it on the surface under the mouse. Selecting the map shows its
 pieces in the **Quake** panel at the bottom of the editor, with a filter and a size slider; they drag from there
-the same way. `pieces/save_as` chooses what a piece is:
+the same way. A `QuakeLightmap` gives pieces the maps' full ambient occlusion, they are architecture: their
+meshes carry the meta `quake_dirt_depth_scale` 1 (see [Lighting](lighting.md)). `pieces/save_as` chooses what a
+piece is:
 
 | `pieces/save_as` | A piece | Dropped into a scene |
 |---|---|---|

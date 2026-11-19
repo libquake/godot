@@ -43,3 +43,5 @@ func test_pieces_as_meshes() -> void:
 	check_equal(importer.save_pieces("res://maps/pieces.map", options, QuakePieces.new(), meshes, files), OK, "imported")
 	check_equal(files.size(), 3, "a file per piece")
 	check(load("res://maps/pieces_as_meshes/crate.res") is Mesh, "the bare mesh")
+	check_equal(load("res://maps/pieces_as_meshes/crate.res").get_meta(QuakeLightmap.DIRT_META, -1.0), 1.0,
+			"the maps' full ambient occlusion, pieces are architecture")
