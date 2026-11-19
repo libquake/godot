@@ -302,7 +302,8 @@ func _revert() -> void:
 	if _styles:
 		_styles.queue_free()
 		_styles = null
-	_materials.clear()
+	# a new one, not clear(): a reloaded script keeps the old value, typed as the previous version declared it
+	_materials = {}
 
 
 func _apply_mesh(mesh_instance: MeshInstance3D, uv_transform: Vector4) -> void:
