@@ -89,8 +89,8 @@ static func save_pieces(source_file: String, options: Dictionary, pieces: QuakeP
 			continue
 		for surface in mesh.get_surface_count():
 			mesh.surface_set_material(surface, materials.get_material(mesh.surface_get_name(surface)))
-		# brushes are architecture, a QuakeLightmap gives them the maps' full ambient occlusion
-		mesh.set_meta(QuakeLightmap.DIRT_META, 1.0)
+		# brushes are architecture, a QuakeLightmap bakes them like the maps
+		mesh.set_meta(QuakeLightmap.LEVEL_META, true)
 
 		var piece_name := _piece_name(entity, index)
 		var path := _piece_path(folder, piece_name, "scn" if as_scenes else "res", pieces.files)

@@ -8,8 +8,11 @@ extends Node3D
 const RECT_PARAMETER := &"lightmap_rect"
 ## On a baked material: its source.
 const SOURCE_META := &"quake_lightmap_source"
-## On a mesh node, a node above it or a Mesh: scales the maps' _dirtdepth there instead of
-## mesh_dirt_depth_scale, 0 is no ambient occlusion. Pieces imported from maps carry 1, they are architecture.
+## On a mesh node, a node above it or a Mesh: the mesh is level geometry and baked like the maps, with
+## luxel_size and their full ambient occlusion, so it blends in. Pieces imported from maps carry it.
+const LEVEL_META := &"quake_level_geometry"
+## On a mesh node, a node above it or a Mesh: scales the maps' _dirtdepth there, 0 is no ambient occlusion.
+## Wins over mesh_dirt_depth_scale and LEVEL_META.
 const DIRT_META := &"quake_dirt_depth_scale"
 
 ## Clear to remove the bake.
@@ -141,13 +144,14 @@ func bake_to(path := "") -> bool:
 	for source in _static_geometry():
 		var node: GeometryInstance3D = source.node
 		var key: Variant = _atlas_key(source)
+		var level: bool = key is Array or _model_meta(source, LEVEL_META, false)
 		var texel_scale := node.gi_lightmap_texel_scale
-		if not key is Array:
+		if not level:
 			texel_scale *= luxel_size / mesh_luxel_size
 		var group: Dictionary = groups.get_or_add(key, {
 			"vertices": PackedVector3Array(), "normals": PackedVector3Array(), "uv2": PackedVector2Array(),
 			"indices": PackedInt32Array(), "colors": PackedColorArray(), "nodes": [], "texel_scale": texel_scale,
-			"dirt_depth_scale": 1.0 if key is Array else _dirt_depth_scale(source),
+			"dirt_depth_scale": 1.0 if key is Array else _dirt_depth_scale(source, level),
 		})
 		if _add_mesh(baker, source, group):
 			group.nodes.append(node)
@@ -442,19 +446,27 @@ func _add_mesh(baker: QuakeLightBaker, source: Dictionary, group: Dictionary) ->
 	return lit
 
 
-## DIRT_META on the node or above, then on its mesh, then mesh_dirt_depth_scale.
-func _dirt_depth_scale(source: Dictionary) -> float:
+## DIRT_META, else the maps' depth for level geometry, else mesh_dirt_depth_scale.
+func _dirt_depth_scale(source: Dictionary, level: bool) -> float:
+	var meta: Variant = _model_meta(source, DIRT_META, null)
+	if meta != null:
+		return meta
+	if level:
+		return 1.0
+	return mesh_dirt_depth_scale if mesh_dirt_depth_scale >= 0.0 else mesh_luxel_size / luxel_size
+
+
+## A meta on the mesh node or a node above it, up to this node's scope, then on its mesh.
+func _model_meta(source: Dictionary, name: StringName, default: Variant) -> Variant:
 	var node: Node = source.node
 	while node:
-		if node.has_meta(DIRT_META):
-			return node.get_meta(DIRT_META)
+		if node.has_meta(name):
+			return node.get_meta(name)
 		if node == _scope():
 			break
 		node = node.get_parent()
 	var mesh: Mesh = source.mesh
-	if mesh and mesh.has_meta(DIRT_META):
-		return mesh.get_meta(DIRT_META)
-	return mesh_dirt_depth_scale if mesh_dirt_depth_scale >= 0.0 else mesh_luxel_size / luxel_size
+	return mesh.get_meta(name) if mesh and mesh.has_meta(name) else default
 
 
 ## Why a UV2 can not hold a lightmap, empty if it can. Meshes with UV sets from elsewhere often have one that
