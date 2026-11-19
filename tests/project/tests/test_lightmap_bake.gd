@@ -154,3 +154,14 @@ func _floor_at_wall(dirt: int) -> Color:
 	var uv := baker.get_surface_uv_transform(floor_surface)
 	var at := Vector2(0.98 * uv.x + uv.z, 0.5 * uv.y + uv.w) * Vector2(image.get_size())
 	return image.get_pixelv(Vector2i(at))
+
+
+## The inspector shows the baked material: a color set there goes back to the source and survives a new bake.
+func test_edits_on_the_baked_material_are_kept() -> void:
+	var source := StandardMaterial3D.new()
+	source.albedo_color = Color.RED
+	var baked := QuakeLightmap._world_material(source)
+	baked.set_meta(QuakeLightmap.SOURCE_META, source)
+	baked.set_shader_parameter(&"albedo_color", Color.GREEN)
+	check(QuakeLightmap._source(baked) == source, "the source comes back")
+	check_equal(source.albedo_color, Color.GREEN, "with the color set on the baked material")

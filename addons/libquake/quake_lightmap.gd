@@ -238,6 +238,10 @@ func _revert() -> void:
 		if not alive:
 			continue
 		var mesh_instance: MeshInstance3D = applied.node
+		# what was set on the baked materials goes back to their sources
+		_source(mesh_instance.material_override)
+		for surface in mesh_instance.get_surface_override_material_count():
+			_source(mesh_instance.get_surface_override_material(surface))
 		mesh_instance.material_override = applied.material_override
 		var overrides: Array = applied.overrides
 		for surface in mini(overrides.size(), mesh_instance.get_surface_override_material_count()):
@@ -348,9 +352,27 @@ func _baked_material(source: Material) -> Material:
 	return baked
 
 
-## Duplicated nodes copy the baked material as a real override.
+## Duplicated nodes copy the baked material as a real override. A color or texture set on the baked material
+## goes back to its source, the inspector shows the baked one and a new bake would lose it otherwise.
 static func _source(material: Material) -> Material:
-	return material.get_meta(SOURCE_META) if material and material.has_meta(SOURCE_META) else material
+	if not material or not material.has_meta(SOURCE_META):
+		return material
+	var source: Material = material.get_meta(SOURCE_META)
+	var color: Variant = material.get_shader_parameter(&"albedo_color")
+	if color is Vector4:
+		color = Color(color.x, color.y, color.z, color.w)
+	var texture: Variant = material.get_shader_parameter(&"albedo_texture")
+	if source is BaseMaterial3D:
+		if color is Color and color != source.albedo_color:
+			source.albedo_color = color
+		if texture != source.albedo_texture:
+			source.albedo_texture = texture
+	elif source is ShaderMaterial:
+		if color is Color and color != source.get_shader_parameter(&"albedo_color"):
+			source.set_shader_parameter(&"albedo_color", color)
+		if texture != source.get_shader_parameter(&"albedo_texture"):
+			source.set_shader_parameter(&"albedo_texture", texture)
+	return source
 
 
 ## Takes textures, colors and tiling of a StandardMaterial3D.
