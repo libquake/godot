@@ -16,6 +16,7 @@ func _init(source_file: String, options: Dictionary, merge_groups := false) -> v
 	level.merge_groups = merge_groups
 	level.bake = options.get("lighting/bake", false)
 	level.luxel_size = options.get("lighting/luxel_size", 16.0)
+	level.sky_samples = options.get("lighting/sky_samples", 64)
 	level.sky_surfaces = options.get("surfaces/draw_sky", true)
 	level.wad_directories = wad_directories(options.get("textures/wad_directories", PackedStringArray()))
 	level.texture_size_provider = texture_files.size

@@ -69,6 +69,8 @@ static func _options() -> Array[Dictionary]:
 		{"name": "lighting/bake", "default": true},
 		# Map units per lightmap texel.
 		{"name": "lighting/luxel_size", "default": 16.0},
+		# Suns per sky dome (_sunlight2, _sunlight3), fewer bake faster.
+		{"name": "lighting/sky_samples", "default": 64, "hint": PROPERTY_HINT_RANGE, "hint_string": "8,2048"},
 		# Meters between the points that light models, 0 is none.
 		{"name": "lighting/light_grid_cell_size", "default": 1.0},
 		# Off shows the WorldEnvironment's sky.

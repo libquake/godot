@@ -63,6 +63,10 @@ namespace libquake_godot {
 
     float get_luxel_size() const { return luxel_size; }
 
+    void set_sky_samples(int value) { sky_samples = value; }
+
+    int get_sky_samples() const { return sky_samples; }
+
     void set_csg(bool value) { csg = value; }
 
     bool get_csg() const { return csg; }
@@ -106,6 +110,7 @@ namespace libquake_godot {
     float units_per_meter = 32.0f;
     bool bake = true;
     float luxel_size = 16.0f;
+    int sky_samples = 64;
     bool sky_surfaces = true;
     bool csg = true;
     Pivot pivot = PIVOT_MAP_ORIGIN;

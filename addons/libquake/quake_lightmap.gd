@@ -24,7 +24,7 @@ const SOURCE_META := &"quake_lightmap_source"
 @export var godot_lights := true
 ## The light entities of imported maps.
 @export var quake_lights := true
-## Sun, _minlight, _anglescale and _range.
+## Sun, sky dome, _minlight, _anglescale and _range.
 @export var worldspawn := true
 ## Quake light value of energy 1.
 @export var light_intensity := 300.0
@@ -42,6 +42,10 @@ const SOURCE_META := &"quake_lightmap_source"
 @export var units_per_meter := 32.0
 ## Meters between the points that light models, 0 is none.
 @export var light_grid_cell_size := 1.0
+
+@export_group("Quality")
+## Suns per sky dome (_sunlight2, _sunlight3), fewer bake faster.
+@export_range(8, 2048) var sky_samples := 64
 
 var _applied: Array[Dictionary] = []
 var _switched_off_lights: Array[Light3D] = []
@@ -102,6 +106,7 @@ func bake_to(path := "") -> bool:
 	baker.luxel_size = luxel_size
 	baker.minimum_light = minimum_light
 	baker.ambient_light = ambient_light
+	baker.sky_samples = sky_samples
 	var result := QuakeLightmapData.new()
 	var groups := {}
 	for source in _static_geometry():

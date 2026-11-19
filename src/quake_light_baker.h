@@ -19,6 +19,7 @@ namespace libquake_godot {
       LIGHT_POINT,
       LIGHT_SPOT,
       LIGHT_SUN,
+      LIGHT_SKY_DOME,
     };
 
     int add_surface(const godot::PackedVector3Array &vertices, const godot::PackedVector3Array &normals,
@@ -60,6 +61,10 @@ namespace libquake_godot {
 
     int get_padding() const { return padding; }
 
+    void set_sky_samples(int value) { sky_samples = value; }
+
+    int get_sky_samples() const { return sky_samples; }
+
   protected:
     static void _bind_methods();
 
@@ -98,6 +103,8 @@ namespace libquake_godot {
     /// added to the light everywhere, 1 is normal brightness
     godot::Color ambient_light{0, 0, 0};
     int padding = 2;
+    /// suns per sky dome
+    int sky_samples = 64;
   };
 
 } // namespace libquake_godot

@@ -76,7 +76,7 @@ namespace libquake_godot {
     light.color = {color.r, color.g, color.b};
     light.intensity = intensity;
     // linear falloff that reaches zero at the range, like Godot's lights end there
-    if (type != LIGHT_SUN && range > 0)
+    if (type != LIGHT_SUN && type != LIGHT_SKY_DOME && range > 0)
       light.distanceScale = std::abs(intensity) / (range * units_per_meter);
     light.coneAngle = cone_angle;
     light.castShadows = shadows;
@@ -100,8 +100,8 @@ namespace libquake_godot {
     quakelib::BakeOptions mapOptions;
     // map units with Godot's axes, relative to the map
     for (auto light : quakelib::QuakeLightsFromEntities(levelEntities, true, &mapOptions)) {
-      bool sun = light.type == quakelib::BakeLight::Type::Sun;
-      if (sun ? !worldspawn : !add_lights)
+      bool sky = light.type == quakelib::BakeLight::Type::Sun || light.type == quakelib::BakeLight::Type::SkyDome;
+      if (sky ? !worldspawn : !add_lights)
         continue;
       Vector3 position(light.position.X, light.position.Y, light.position.Z);
       Vector3 direction(light.direction.X, light.direction.Y, light.direction.Z);
@@ -148,6 +148,7 @@ namespace libquake_godot {
       bakeOptions.minLight = minimum_light * NORMAL_LIGHT;
       bakeOptions.minLightColor = {1, 1, 1};
     }
+    bakeOptions.quality.skySamples = sky_samples;
     auto baked = quakelib::BakeLightmap(input, occluders, lights, bakeOptions);
     bake_milliseconds = baked.bakeMilliseconds;
 
@@ -310,6 +311,8 @@ namespace libquake_godot {
     ClassDB::bind_method(D_METHOD("get_ambient_light"), &QuakeLightBaker::get_ambient_light);
     ClassDB::bind_method(D_METHOD("set_padding", "value"), &QuakeLightBaker::set_padding);
     ClassDB::bind_method(D_METHOD("get_padding"), &QuakeLightBaker::get_padding);
+    ClassDB::bind_method(D_METHOD("set_sky_samples", "value"), &QuakeLightBaker::set_sky_samples);
+    ClassDB::bind_method(D_METHOD("get_sky_samples"), &QuakeLightBaker::get_sky_samples);
 
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "units_per_meter"), "set_units_per_meter",
                  "get_units_per_meter");
@@ -317,10 +320,12 @@ namespace libquake_godot {
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "minimum_light"), "set_minimum_light", "get_minimum_light");
     ADD_PROPERTY(PropertyInfo(Variant::COLOR, "ambient_light"), "set_ambient_light", "get_ambient_light");
     ADD_PROPERTY(PropertyInfo(Variant::INT, "padding"), "set_padding", "get_padding");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "sky_samples"), "set_sky_samples", "get_sky_samples");
 
     BIND_ENUM_CONSTANT(LIGHT_POINT);
     BIND_ENUM_CONSTANT(LIGHT_SPOT);
     BIND_ENUM_CONSTANT(LIGHT_SUN);
+    BIND_ENUM_CONSTANT(LIGHT_SKY_DOME);
   }
 
 } // namespace libquake_godot

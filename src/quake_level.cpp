@@ -55,6 +55,9 @@ namespace libquake_godot {
         options.mergeGroups = merge_groups;
         options.bake = bake;
         options.lightmapUV.luxelSize = luxel_size;
+        quakelib::BakeQuality quality;
+        quality.skySamples = sky_samples;
+        options.bakeQuality = quality;
         options.textureSize = [&](const std::string &name) { return textureSize(name, lookup); };
         level = quakelib::BuildMap(document, options);
       }
@@ -256,6 +259,8 @@ namespace libquake_godot {
     ClassDB::bind_method(D_METHOD("get_bake"), &QuakeLevel::get_bake);
     ClassDB::bind_method(D_METHOD("set_luxel_size", "value"), &QuakeLevel::set_luxel_size);
     ClassDB::bind_method(D_METHOD("get_luxel_size"), &QuakeLevel::get_luxel_size);
+    ClassDB::bind_method(D_METHOD("set_sky_samples", "value"), &QuakeLevel::set_sky_samples);
+    ClassDB::bind_method(D_METHOD("get_sky_samples"), &QuakeLevel::get_sky_samples);
     ClassDB::bind_method(D_METHOD("set_csg", "value"), &QuakeLevel::set_csg);
     ClassDB::bind_method(D_METHOD("get_csg"), &QuakeLevel::get_csg);
     ClassDB::bind_method(D_METHOD("set_pivot", "value"), &QuakeLevel::set_pivot);
@@ -279,6 +284,7 @@ namespace libquake_godot {
                  "get_units_per_meter");
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bake"), "set_bake", "get_bake");
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "luxel_size"), "set_luxel_size", "get_luxel_size");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "sky_samples"), "set_sky_samples", "get_sky_samples");
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "csg"), "set_csg", "get_csg");
     ADD_PROPERTY(PropertyInfo(Variant::INT, "pivot", PROPERTY_HINT_ENUM,
                               "Map Origin,Center,Bottom Center,Bottom Corner"),

@@ -4,8 +4,10 @@
 
 A `.map` is lit when it is imported: libquake bakes its `light` entities the way the Quake light tools do it,
 with Quake's keys (`light`, `_color`, `wait`, `delay`, `mangle` for spotlights) and the worldspawn's
-`_sunlight`, `_sun_mangle`, `_sunlight_color` and `_minlight`. `lighting/luxel_size` sets the map units per
-lightmap texel, 16 matches Quake. A `.bsp` brings its lightmap.
+`_sunlight`, `_sun_mangle`, `_sunlight_color`, `_minlight` and the sky domes `_sunlight2` and `_sunlight3`
+(light from the whole sky, with `_sunlight2_color` and `_sunlight3_color`). `lighting/luxel_size` sets the map
+units per lightmap texel, 16 matches Quake, `lighting/sky_samples` the suns per sky dome. A `.bsp` brings its
+lightmap.
 
 The light is emitted by the surfaces. The `Environment`'s ambient light does not add to it, the baked light
 covers that; Godot's lights do, see [Dynamic lights](#dynamic-lights).
@@ -96,6 +98,7 @@ What is baked:
 - `ambient_light` is added everywhere, `minimum_light` raises dark spots like `_minlight`.
 - `luxel_size` (16 map units) for the brushes of imported maps, `mesh_luxel_size` (2) for every other mesh,
   scaled by its `gi_lightmap_texel_scale`.
+- Quality: `sky_samples` (64) suns per sky dome, fewer bake faster.
 - Models are lit by a light grid built from the bake, it replaces the grids of the maps it covers.
 
 GridMaps are not baked, their cells are no nodes of their own.
