@@ -76,7 +76,8 @@ var _replaced_grids: Array[QuakeLightGrid] = []
 var _grid: QuakeLightGrid
 var _paused_styles: Array[QuakeLightStyles] = []
 var _styles: QuakeLightStyles
-var _materials: Dictionary[Material, Material] = {}
+## Source material -> {lightmap rect: baked material}.
+var _materials: Dictionary[Material, Dictionary] = {}
 var _surface_colors: Dictionary[Material, Color] = {}
 var _bake_thread: Thread
 
@@ -280,6 +281,7 @@ func _revert() -> void:
 		var overrides: Array = applied.overrides
 		for surface in mini(overrides.size(), mesh_instance.get_surface_override_material_count()):
 			mesh_instance.set_surface_override_material(surface, overrides[surface])
+		# scenes baked before the rect moved into the materials kept it on the instance
 		mesh_instance.set_instance_shader_parameter(RECT_PARAMETER, null)
 	_applied.clear()
 	for light in _switched_off_lights:
@@ -310,16 +312,15 @@ func _apply_mesh(mesh_instance: MeshInstance3D, uv_transform: Vector4) -> void:
 		"overrides": [],
 	}
 	if mesh_instance.material_override:
-		mesh_instance.material_override = _baked_material(applied.material_override)
+		mesh_instance.material_override = _baked_material(applied.material_override, uv_transform)
 	for surface in mesh_instance.get_surface_override_material_count():
 		var current := _source(mesh_instance.get_surface_override_material(surface))
 		if current == mesh_instance.mesh.surface_get_material(surface):
 			current = null
 		applied.overrides.append(current)
-		var baked := _baked_material(_source(mesh_instance.get_active_material(surface)))
+		var baked := _baked_material(_source(mesh_instance.get_active_material(surface)), uv_transform)
 		if baked:
 			mesh_instance.set_surface_override_material(surface, baked)
-	mesh_instance.set_instance_shader_parameter(RECT_PARAMETER, uv_transform)
 	_applied.append(applied)
 
 
@@ -368,12 +369,14 @@ func _replace_light_styles() -> void:
 	add_child(_styles, false, INTERNAL_MODE_BACK)
 
 
-## Null for materials that take no lightmap.
-func _baked_material(source: Material) -> Material:
+## Null for materials that take no lightmap. One per source and place in the atlas: the meshes of a map share
+## theirs, so its materials are copied once.
+func _baked_material(source: Material, uv_transform: Vector4) -> Material:
 	if not source:
 		return null
-	if _materials.has(source):
-		return _materials[source]
+	var by_rect: Dictionary = _materials.get_or_add(source, {})
+	if by_rect.has(uv_transform):
+		return by_rect[uv_transform]
 	var baked: ShaderMaterial = null
 	if source is ShaderMaterial and source.shader == QuakeMaterials.WORLD_SHADER:
 		baked = source.duplicate()
@@ -381,8 +384,9 @@ func _baked_material(source: Material) -> Material:
 		baked = _world_material(source)
 	if baked:
 		baked.set_shader_parameter(&"lightmap_texture", data.texture)
+		baked.set_shader_parameter(RECT_PARAMETER, uv_transform)
 		baked.set_meta(SOURCE_META, source)
-	_materials[source] = baked
+	by_rect[uv_transform] = baked
 	return baked
 
 

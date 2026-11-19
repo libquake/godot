@@ -14,8 +14,10 @@ uniform vec4 albedo_color : source_color = vec4(1.0);
 uniform sampler2D emission_texture : filter_nearest_mipmap, repeat_enable, hint_default_black;
 // 128 is normal brightness, so a surface can get up to twice as bright as its texture
 uniform sampler2D lightmap_texture : filter_linear, repeat_disable;
-// where UV2 lands in lightmap_texture: scale, offset. A QuakeLightmap sets it per mesh instance.
-instance uniform vec4 lightmap_rect = vec4(1.0, 1.0, 0.0, 0.0);
+// where UV2 lands in lightmap_texture: scale, offset. A QuakeLightmap sets it on its copies of the materials,
+// one per place in its atlas. Not an instance uniform: Godot has room for only some thousand instances with
+// those, a large map has more meshes.
+uniform vec4 lightmap_rect = vec4(1.0, 1.0, 0.0, 0.0);
 // above 1 fullbright pixels pass the Environment's glow threshold and bloom
 uniform float fullbright_energy = 1.0;
 // tiling of materials made from a StandardMaterial3D, its uv1_scale and uv1_offset

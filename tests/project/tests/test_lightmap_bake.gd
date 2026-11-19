@@ -28,6 +28,9 @@ func test_bake() -> void:
 	check(material != null and material.shader == QuakeMaterials.WORLD_SHADER, "the box gets the world shader")
 	if material:
 		check_equal(material.get_shader_parameter(&"uv_scale"), Vector2(4, 4), "tiling of the StandardMaterial3D")
+		var box_index := meshes.find("../Box")
+		check_equal(material.get_shader_parameter(QuakeLightmap.RECT_PARAMETER), lightmap.data.uv_transforms[box_index],
+				"its place in the atlas on the material, no instance uniform")
 	check_equal(scene.get_node("Light").light_cull_mask, 0xFFFFFFFF, "the baked light keeps its cull mask")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVED))
 
