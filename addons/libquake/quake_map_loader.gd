@@ -1,7 +1,7 @@
 @tool
 class_name QuakeMapLoader
 extends RefCounted
-## Loads a map with the options of an import, shared by the level and the mesh library importer.
+## Loads a map with the options of an import, shared by the level and the pieces importer.
 
 var level := QuakeLevel.new()
 var texture_files: QuakeTextureFiles
@@ -31,7 +31,7 @@ func worldspawn() -> Dictionary:
 
 
 ## The worldspawn key _meshlib (qu_meshlib in older maps) marks a map of pieces, any value but "0".
-func is_mesh_library() -> bool:
+func is_pieces() -> bool:
 	var properties: Dictionary = worldspawn().get("properties", {})
 	for key in ["_meshlib", "qu_meshlib"]:
 		if properties.has(key) and properties[key] != "0":

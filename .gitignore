@@ -7,3 +7,5 @@ addons/libquake/bin/*
 tests/project/.godot/
 tests/project/scenes/*.lightmap.res
 .DS_Store
+tests/project/maps/pieces/
+tests/project/maps/pieces_as_meshes/

@@ -47,7 +47,16 @@ Each map has its options in the Import dock. Their defaults for new maps are in 
 |---|---|---|
 | `editor/show_hulls` | off | the collision of brushes in the editor; triggers (orange) and liquids (blue) show either way |
 
-A mesh library has no lighting and entities options.
+## Pieces
+
+Only for maps of pieces, see [Maps](../guide/maps.md#pieces).
+
+| Option | Default | |
+|---|---|---|
+| `pieces/save_as` | Scenes | what each piece is saved as: a scene of a `MeshInstance3D` with its collision, or the bare mesh |
+| `pieces/folder` | | where the pieces go; empty is a folder named like the map next to it |
+
+Pieces have no lighting, entities and editor options, a level no pieces options.
 
 ## Project settings
 

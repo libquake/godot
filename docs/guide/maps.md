@@ -50,20 +50,32 @@ A `.bsp` keeps no brushes: its faces are the collision, one `ConcavePolygonShape
 left out. Clip brushes and liquid volumes are lost in a compiled bsp, so it has neither. It brings its own
 textures and lightmap (with a `.lit` file next to it, colored), version 29 and BSP2.
 
-## Mesh libraries
+## Pieces
 
-A map of pieces becomes a mesh library with the worldspawn key `_meshlib` set to `1`: the level import
-switches the map to the mesh library importer and reimports it. **Import As > Quake Mesh Library** in the
-Import dock does the same by hand; switching back to a level is always by hand.
+A map of pieces is built in TrenchBroom and put together into levels in Godot. It needs the worldspawn key
+`_meshlib` set to `1`: the level import switches the map to the pieces importer and reimports it.
+**Import As > Quake Pieces** in the Import dock does the same by hand; switching back to a level is always by
+hand.
 
-Every TrenchBroom group becomes one item named like the group, brush entities inside it included, with its
-pivot as the item's origin. Brush entities outside groups get their own item, loose world brushes the item
-`worldspawn`. Bottom Center puts pieces on the floor of a GridMap cell, Bottom Corner snaps pieces of any size
-to the grid.
+Every TrenchBroom group becomes one piece named like the group, brush entities inside it included, with its
+pivot as the piece's origin. Brush entities outside groups get their own piece, loose world brushes the piece
+`worldspawn`. Bottom Center puts pieces on the floor, Bottom Corner lets pieces of any size snap to a grid.
 
-An item's id is derived from its name, so placed GridMaps keep their pieces across reimports as long as the
-group names stay. Mesh libraries are lit by Godot: their materials are matte `StandardMaterial3D`s with sharp
-pixels.
+Each piece is saved as a file of its own, by default in a folder named like the map next to it
+(`maps/pieces.map` puts them in `maps/pieces/`). In the FileSystem dock's thumbnail view the folder is a palette:
+drag a piece into the 3D viewport and Godot puts it on the surface under the mouse. `pieces/save_as` chooses what
+a piece is:
+
+| `pieces/save_as` | A piece | Dropped into a scene |
+|---|---|---|
+| Scenes | `<name>.scn`: a `MeshInstance3D` with a `StaticBody3D` of the piece's brushes | an instance of the scene, with collision |
+| Meshes | `<name>.res`: the mesh | a `MeshInstance3D` without collision |
+
+Placed pieces follow the map: a reimport saves over the files and keeps their uids, so a changed group in
+TrenchBroom changes every placed copy. Pieces removed from the map keep their file, scenes may still use it; the
+import warns about them. Their materials are matte `StandardMaterial3D`s with sharp pixels, lit by Godot.
+
+The map itself imports as a `QuakePieces` resource, which lists every piece with its name, file and a preview.
 
 ## In the editor
 

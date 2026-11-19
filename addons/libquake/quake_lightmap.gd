@@ -2,7 +2,7 @@
 class_name QuakeLightmap
 extends Node3D
 ## Bakes light the way the Quake light tools do for the static meshes next to and below it, like
-## LightmapGI: brushes of imported maps, mesh library pieces and models alike. Select it and press
+## LightmapGI: brushes of imported maps, pieces and models alike. Select it and press
 ## "Bake Quake Light" in the 3D editor's toolbar.
 ##
 ## Meshes take part with gi_mode Static and UV2, CSG shapes get UV2 when they are baked. Meshes below a

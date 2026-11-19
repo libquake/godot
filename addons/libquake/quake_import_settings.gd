@@ -6,8 +6,12 @@ extends RefCounted
 
 const PREFIX := "libquake/"
 const PIVOTS := "Map Origin,Center,Bottom Center,Bottom Corner"
-## Groups a mesh library has no use for: it is lit by Godot and has no entities.
+## Groups pieces have no use for: they are lit by Godot and have no entities.
 const LEVEL_ONLY_GROUPS := ["lighting", "entities", "editor"]
+## Groups only pieces have.
+const PIECES_ONLY_GROUPS := ["pieces"]
+const SAVE_PIECES_AS := "Scenes,Meshes"
+enum Pieces { SCENES, MESHES }
 
 
 static func register() -> void:
@@ -26,10 +30,12 @@ static func register() -> void:
 
 
 static func level_options() -> Array[Dictionary]:
-	return _import_options(_options())
+	var options := _options().filter(func(option: Dictionary) -> bool:
+		return not PIECES_ONLY_GROUPS.has(option.name.get_slice("/", 0)))
+	return _import_options(options)
 
 
-static func mesh_library_options() -> Array[Dictionary]:
+static func pieces_options() -> Array[Dictionary]:
 	var options := _options().filter(func(option: Dictionary) -> bool:
 		return not LEVEL_ONLY_GROUPS.has(option.name.get_slice("/", 0)))
 	return _import_options(options)
@@ -88,4 +94,9 @@ static func _options() -> Array[Dictionary]:
 		{"name": "entities/ground_fog_styles", "default": PackedStringArray()},
 		# The collision of brushes in the editor; triggers and liquids show either way.
 		{"name": "editor/show_hulls", "default": false},
+		# What a map of pieces saves each piece as, to drag into a scene: a MeshInstance3D with its collision, or
+		# the bare mesh, which Godot drops as a MeshInstance3D.
+		{"name": "pieces/save_as", "default": Pieces.SCENES, "hint": PROPERTY_HINT_ENUM, "hint_string": SAVE_PIECES_AS},
+		# Where the pieces go, empty is a folder named like the map next to it.
+		{"name": "pieces/folder", "default": "", "hint": PROPERTY_HINT_DIR},
 	]

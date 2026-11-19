@@ -27,7 +27,7 @@ func _enter_tree() -> void:
 		var file_menu: EditorContextMenuPlugin = preload("quake_file_menu.gd").new()
 		add_context_menu_plugin(slot, file_menu)
 		_file_menus.append(file_menu)
-	for importer in [preload("quake_level_importer.gd"), preload("quake_mesh_library_importer.gd")]:
+	for importer in [preload("quake_level_importer.gd"), preload("quake_pieces_importer.gd")]:
 		var instance: EditorImportPlugin = importer.new()
 		add_import_plugin(instance)
 		_importers.append(instance)

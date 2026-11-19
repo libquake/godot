@@ -1,14 +1,16 @@
 [remap]
 
-importer="libquake.mesh_library"
-type="MeshLibrary"
+importer="libquake.pieces"
+type="Resource"
 uid="uid://bocd48l4ymgjo"
 path="res://.godot/imported/pieces.map-9cda5e1b7ca3e76c350482ac87d450b8.res"
 
 [deps]
 
+files=["res://maps/pieces/worldspawn.scn", "res://maps/pieces/crate.scn", "res://maps/pieces/pillar.scn"]
+
 source_file="res://maps/pieces.map"
-dest_files=["res://.godot/imported/pieces.map-9cda5e1b7ca3e76c350482ac87d450b8.res"]
+dest_files=["res://.godot/imported/pieces.map-9cda5e1b7ca3e76c350482ac87d450b8.res", "res://maps/pieces/worldspawn.scn", "res://maps/pieces/crate.scn", "res://maps/pieces/pillar.scn"]
 
 [params]
 
@@ -23,3 +25,5 @@ surfaces/teleport_alpha=1.0
 surfaces/fullbright_energy=1.0
 textures/texture_directories=PackedStringArray("res://textures")
 textures/wad_directories=PackedStringArray()
+pieces/save_as=0
+pieces/folder=""

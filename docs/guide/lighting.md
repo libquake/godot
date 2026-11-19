@@ -73,7 +73,7 @@ layer needs that layer on the light as well.
 
 ## Baking in Godot
 
-A level put together in Godot, from imported maps, mesh library pieces and models, gets its light from a
+A level put together in Godot, from imported maps, pieces and models, gets its light from a
 `QuakeLightmap` node with the same baker. Like `LightmapGI` it covers its parent and everything below it:
 select it and press **Bake Quake Light** in the 3D editor's toolbar. The result is saved next to the scene as
 `<scene>.lightmap.res` and applied when the scene loads; clear `data` to remove it.

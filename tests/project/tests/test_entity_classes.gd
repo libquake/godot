@@ -28,7 +28,7 @@ func test_fgd_types_follow_the_defaults() -> void:
 func test_builtin_entities_are_in_every_fgd() -> void:
 	var fgd := QuakeEntityClasses.new().to_fgd()
 	check(fgd.contains("= worldspawn"), "worldspawn")
-	check(fgd.contains("_meshlib(choices)"), "the mesh library key")
+	check(fgd.contains("_meshlib(choices)"), "the pieces key")
 	check(fgd.contains("= light :"), "light")
 
 

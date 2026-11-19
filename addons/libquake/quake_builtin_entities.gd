@@ -23,7 +23,7 @@ static func classes() -> Array[QuakeEntityClass]:
 			"_telealpha": 1.0,
 		}, {
 			"wad": "Semicolon separated wad files",
-			"_meshlib": "The map is a mesh library: each group becomes a piece for GridMaps",
+			"_meshlib": "The map is a set of pieces: each group becomes a scene to place in levels",
 			"_minlight": "Minimum light level",
 			"_sunlight": "Brightness of the sun",
 			"_sun_mangle": "Direction of the sun: yaw pitch roll",

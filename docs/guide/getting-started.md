@@ -51,7 +51,7 @@ worldspawn key `wad`. See [Textures](textures.md).
 
 ## Next
 
-- [Maps](maps.md): what an imported map is made of, mesh libraries, the map inspector
+- [Maps](maps.md): what an imported map is made of, pieces to drag into levels, the map inspector
 - [Lighting](lighting.md): baked light, light styles, models, baking in Godot and in the game
 - [Entities](entities.md): entity classes, keys as `@export` variables, scripting
 - [Effects](effects.md): underwater view and ground fog

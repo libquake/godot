@@ -1,7 +1,7 @@
 @tool
 extends EditorImportPlugin
 ## Imports .map and .bsp files as scenes. Saving the map in TrenchBroom reimports it, lights included.
-## A map with the worldspawn key _meshlib is switched to the mesh library importer instead.
+## A map with the worldspawn key _meshlib is switched to the pieces importer instead.
 
 
 
@@ -58,8 +58,8 @@ func _import(source_file: String, save_path: String, options: Dictionary,
 	var loader := QuakeMapLoader.new(source_file, options)
 	if loader.error != OK:
 		return loader.error
-	if loader.is_mesh_library():
-		_switch_to_mesh_library(source_file)
+	if loader.is_pieces():
+		_switch_to_pieces(source_file)
 		return _save(QuakeMap.new(), save_path)
 
 	var builder := QuakeSceneBuilder.new()
@@ -104,17 +104,17 @@ func _save(root: Node, save_path: String) -> Error:
 	return ResourceSaver.save(scene, "%s.%s" % [save_path, _get_save_extension()])
 
 
-## What "Import As > Quake Mesh Library" does: change the importer in the .import file and reimport.
+## What "Import As > Quake Pieces" does: change the importer in the .import file and reimport.
 ## Both wait until the current import is over, the editor writes the .import file itself at its end.
-static func _switch_to_mesh_library(source_file: String) -> void:
+static func _switch_to_pieces(source_file: String) -> void:
 	var file_system := EditorInterface.get_resource_filesystem()
 	file_system.resources_reimported.connect(func(_resources: PackedStringArray) -> void:
 		var import_path := source_file + ".import"
 		var config := ConfigFile.new()
 		if config.load(import_path) != OK:
 			return
-		config.set_value("remap", "importer", "libquake.mesh_library")
-		config.set_value("remap", "type", "MeshLibrary")
+		config.set_value("remap", "importer", "libquake.pieces")
+		config.set_value("remap", "type", "Resource")
 		config.save(import_path)
 		file_system.reimport_files.call_deferred(PackedStringArray([source_file])),
 		CONNECT_ONE_SHOT)

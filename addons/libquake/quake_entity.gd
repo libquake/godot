@@ -58,7 +58,7 @@ static func parse(text: String, type: int) -> Variant:
 
 
 ## Sets every @export variable of node that has a key of the same name, parsed to the variable's type.
-## Quake units per meter of the map the node belongs to; outside a map (mesh library pieces) the project's
+## Quake units per meter of the map the node belongs to; outside a map (pieces) the project's
 ## default of geometry/units_per_meter.
 static func units_per_meter(node: Node) -> float:
 	var map := QuakeMap.of(node)

@@ -26,7 +26,7 @@ Then run **Project > Tools > Set up libquake Project**, see [Getting started](gu
 | File | Becomes |
 |---|---|
 | `.map` | a scene with a `QuakeMap` root: meshes per texture, collision per brush, baked light, a node per entity |
-| `.map` with `_meshlib 1` | a `MeshLibrary` for GridMaps, one item per TrenchBroom group |
+| `.map` with `_meshlib 1` | pieces to drag into levels, a scene per TrenchBroom group |
 | `.bsp` | the same scene, with the bsp's textures, lightmap and face collision |
 | `textures/*.png` | read by the maps that use them, nothing has to be imported by hand |
 | `.wad` | read by the maps that name it; **Extract WAD Textures** turns it into images |
