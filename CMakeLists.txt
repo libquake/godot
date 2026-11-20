@@ -37,6 +37,10 @@ target_link_libraries(quakelib_static PUBLIC Threads::Threads)
 # the baker's ray backend: Embree where libquake has a prebuilt for the platform, its own bvh elsewhere.
 # Releases up to v1.1.0 keep the bvh inside the baker.
 if(EXISTS "${LIBQUAKE_DIR}/cmake/embree.cmake")
+  # godot-cpp links the C runtime statically on Windows, Embree has to match
+  if(MSVC AND GODOTCPP_USE_STATIC_CPP)
+    set(QLIB_EMBREE_STATIC_RUNTIME ON CACHE BOOL "" FORCE)
+  endif()
   include("${LIBQUAKE_DIR}/cmake/embree.cmake")
   target_sources(quakelib_static PRIVATE ${QLIB_BVH_SOURCE})
   if(TARGET quakelib_embree)
