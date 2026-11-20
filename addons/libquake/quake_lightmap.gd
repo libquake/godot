@@ -281,8 +281,6 @@ func _revert() -> void:
 		var overrides: Array = applied.overrides
 		for surface in mini(overrides.size(), mesh_instance.get_surface_override_material_count()):
 			mesh_instance.set_surface_override_material(surface, overrides[surface])
-		# scenes baked before the rect moved into the materials kept it on the instance
-		mesh_instance.set_instance_shader_parameter(RECT_PARAMETER, null)
 	_applied.clear()
 	for light in _switched_off_lights:
 		if is_instance_valid(light):

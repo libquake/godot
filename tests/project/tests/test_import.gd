@@ -135,6 +135,14 @@ func test_skybox() -> void:
 	var faces := QuakeSkybox.find("dusk_", PackedStringArray([folder]))
 	check_equal(faces.size(), 6, "all six faces")
 	check(faces.rt is Texture2D, "as textures")
+	var map_path := "user://skybox_test.map"
+	var map := FileAccess.open(map_path, FileAccess.WRITE)
+	map.store_string("{\n\"classname\" \"worldspawn\"\n\"_sky\" \"dusk_\"\n}\n")
+	map.close()
+	var sky_level := QuakeLevel.new()
+	check_equal(sky_level.load(ProjectSettings.globalize_path(map_path)), OK, "_sky map loads")
+	check_equal(QuakeSkybox.of_level(sky_level, PackedStringArray([folder])).size(), 6, "_sky names skybox")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(map_path))
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(folder.path_join("dusk_dn.png")))
 	check(QuakeSkybox.find("dusk_", PackedStringArray([folder])).is_empty(), "nothing without the floor")
 	for suffix: String in QuakeSkybox.SUFFIXES:

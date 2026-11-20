@@ -12,7 +12,7 @@ const SUFFIXES := ["rt", "bk", "lf", "ft", "up", "dn"]
 static func of_level(level: QuakeLevel, directories: PackedStringArray) -> Dictionary:
 	for entity: Dictionary in level.get_entities():
 		if entity.classname == "worldspawn":
-			return find(entity.properties.get("sky", ""), directories)
+			return find(entity.properties.get("sky", entity.properties.get("_sky", "")), directories)
 	return {}
 
 

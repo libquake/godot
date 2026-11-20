@@ -77,6 +77,7 @@ func _import(source_file: String, save_path: String, options: Dictionary,
 
 ## Toasts only warnings that are new since the map's last import, maps reimport on every save.
 static var _last_warnings := {}
+static var _pending_piece_switches := {}
 
 
 static func _announce(source_file: String, warnings: PackedStringArray) -> void:
@@ -105,14 +106,34 @@ func _save(root: Node, save_path: String) -> Error:
 ## Like Import As: changes the importer in the .import file and reimports, after the current import, which
 ## writes the .import file at its end.
 static func _switch_to_pieces(source_file: String) -> void:
+	if _pending_piece_switches.has(source_file):
+		return
+	_pending_piece_switches[source_file] = true
 	var file_system := EditorInterface.get_resource_filesystem()
-	file_system.resources_reimported.connect(func(_resources: PackedStringArray) -> void:
+	var on_resources_reimported: Callable
+	on_resources_reimported = func(resources: PackedStringArray) -> void:
+		if not resources.has(source_file):
+			return
+		file_system.resources_reimported.disconnect(on_resources_reimported)
 		var import_path := source_file + ".import"
 		var config := ConfigFile.new()
 		if config.load(import_path) != OK:
+			_pending_piece_switches.erase(source_file)
+			push_error("%s: could not load import settings." % import_path)
 			return
 		config.set_value("remap", "importer", "libquake.pieces")
 		config.set_value("remap", "type", "Resource")
-		config.save(import_path)
-		file_system.reimport_files.call_deferred(PackedStringArray([source_file])),
-		CONNECT_ONE_SHOT)
+		var error := config.save(import_path)
+		if error != OK:
+			_pending_piece_switches.erase(source_file)
+			push_error("%s: could not save import settings." % import_path)
+			return
+		_reimport_pieces_after_frame(file_system, source_file)
+	file_system.resources_reimported.connect(on_resources_reimported)
+
+
+static func _reimport_pieces_after_frame(file_system: EditorFileSystem, source_file: String) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	await tree.process_frame
+	_pending_piece_switches.erase(source_file)
+	file_system.reimport_files(PackedStringArray([source_file]))
