@@ -6,10 +6,11 @@ A `.map` is lit when it is imported: libquake bakes its `light` entities the way
 with Quake's keys (`light`, `_color`, `wait`, `delay`, `mangle` for spotlights) and the worldspawn's
 `_sunlight`, `_sun_mangle`, `_sunlight_color`, `_minlight`, the sky domes `_sunlight2` and `_sunlight3`
 (light from the whole sky, with `_sunlight2_color` and `_sunlight3_color`), bounced light (`_bounce`,
-`_bouncescale`, `_bouncecolorscale`, `_bouncestyled`) and ambient occlusion (`_dirt` and its keys). `lighting/luxel_size` sets the map units per lightmap
-texel, 16 matches Quake, `lighting/sky_samples` the suns per sky dome, `lighting/bounces` turns bounced light
-on or off whatever the map says, `lighting/bounce_subdivision` sets the size of the patches that bounce it. A
-`.bsp` brings its lightmap.
+`_bouncescale`, `_bouncecolorscale`, `_bouncestyled`), ambient occlusion (`_dirt` and its keys) and smooth
+normals on brush entities with `_phong` / `_phong_angle`, which Godot's lights use as well.
+`lighting/luxel_size` sets the map units per lightmap texel, 16 matches Quake, `lighting/sky_samples` the suns
+per sky dome, `lighting/bounces` turns bounced light on or off whatever the map says,
+`lighting/bounce_subdivision` sets the size of the patches that bounce it. A `.bsp` brings its lightmap.
 
 The light is emitted by the surfaces. The `Environment`'s ambient light does not add to it, the baked light
 covers that; Godot's lights do, see [Dynamic lights](#dynamic-lights).
