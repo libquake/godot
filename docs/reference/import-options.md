@@ -8,7 +8,7 @@ Each map has its options in the Import dock. Their defaults for new maps are in 
 | Option | Default | |
 |---|---|---|
 | `geometry/units_per_meter` | 32 | Quake units per meter, the Quake player is 1.75 m tall. Kept on the `QuakeMap` |
-| `geometry/csg` | on | removes faces hidden inside other brushes of the same entity |
+| `geometry/csg` | on | removes faces hidden inside other brushes: of the same entity, and across worldspawn, `func_group` and `func_detail` as the Quake compilers do |
 | `geometry/pivot` | Bottom Center | origin of brush entities: Map Origin, Center, Bottom Center, Bottom Corner. An `origin` brush or the key `_pivot` (`origin`, `center`, `bottom`, `corner`) wins |
 
 ## Lighting
